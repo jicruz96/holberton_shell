@@ -65,5 +65,5 @@ This is version 2.0 of a previous Holberton School project.
 
 ## Authors 👨🏽‍💻
 
-* Gabriel Abdul Raheem [Github](https://github.com/GabrielAbdul) - [LinkedIn](https://www.linkedin.com/in/gabriel-abdul-raheem-3a1a01144/)
+* Gabriel Abdul-Raheem [Github](https://github.com/GabrielAbdul) - [LinkedIn](https://www.linkedin.com/in/gabriel-abdul-raheem-3a1a01144/)
 * J.I. Cruz [Github](https://github.com/jicruz96) - [LinkedIn](https://linkedin.com/in/jicruzpr)
