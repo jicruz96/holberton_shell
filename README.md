@@ -57,15 +57,11 @@ $ echo "ls" | ./shell
 This is version 2.0 of a previous Holberton School project.
 
 ### Gabriel's Previous Shell
-* [1.0 - First release - 17 Apr 2020](https://github.com/UsmanGTA/simple_shell)
-    * *Written by Gabriel and [Usman Abdul-Jabbar](https://usmanjabbar.com)*
+* [1.0 - First release - 17 Apr 2020](https://github.com/UsmanGTA/simple_shell) | *Written by Gabriel and [Usman Abdul-Jabbar](https://usmanjabbar.com)*
 
 ### J.I.'s Previous Shell
-* [1.0 - First release - 17 Apr 2020](https://github.com/OctopusHugz/simple_shell/tree/5f9dbb9c0bc978b5f8566eac0ce5cc05496c22a0)
-    * *Written by J.I. and [Colson Scott](https://github.com/OctopusHugz)*
-
-* [1.1 - Second release - 15 Sep 2020](https://github.com/jicruz96/simple_shell)
-    * *Because there was nothing better to do during COVID*
+* [1.0 - First release - 17 Apr 2020](https://github.com/OctopusHugz/simple_shell/tree/5f9dbb9c0bc978b5f8566eac0ce5cc05496c22a0) | *Written by J.I. and [Colson Scott](https://github.com/OctopusHugz)*
+* [1.1 - Second release - 15 Sep 2020](https://github.com/jicruz96/simple_shell) | *Because there was nothing better to do during COVID*
 
 ## Authors
 
