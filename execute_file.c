@@ -12,8 +12,9 @@ int execute_file(int fd)
 	char **history;
 	FILE *fp = fdopen(fd, 'r');
 	exec_f executor = NULL;
+	int loop = 1;
 
-	if (fd == STDIN_FILENO)
+	if (isatty(fd))
 	{
 		sprintf(history_path, "%s/%s", homedir, ".hsh_history");
 		free(homedir);
@@ -22,10 +23,27 @@ int execute_file(int fd)
 	}
 
 	/* we may be better off using our own getline, come to think of it */
-	while (getline(&line, &line_size, fp) != -1)
+	while (1)
 	{
+		/*
+		while ((line = getline()) != -1):
+			args = tokenize(line);
+			commands = make_commands(args)
+			for command in commands:
+				status = execute(command)
+				save_history()
+		*/
 		/* this is just the expanded-out version of what we wrote in the
-		commented-out section below */
+		commented-out section above, with some extra additions */
+		printf("%s", prompt);
+		signal(SIGINT, sigint_handler);
+		if (getline(&line, &line_size, fp) == -1)
+		{
+			if (isatty(fd))
+				save_history_to_file(history);
+			return (status);
+		}
+
 		args = tokenize(line);
 		command = make_commands(args);
 		for (tmp = command; tmp; tmp = tmp->next)
@@ -39,19 +57,10 @@ int execute_file(int fd)
 			piped execs, etc) and return a pointer to that function */
 			executor = get_executor(command);
 			status = executor(tmp);
-			if (fd == STDIN_FILEOUT)
-				save_to_history(line, history);
+			if (isatty(fd))
+				save_line_to_history(line, history);
 			/* Logic about operators and exit statuses goes here probably */
 		}
-		free_everything(command);
+		free_command_chain(command);
 	}
-	/*
-	   while ((line = getline()) != -1):
-		args = tokenize(line);
-		commands = make_commands(args)
-		for command in commands:
-			status = execute(command)
-			save_history()
-	*/
-	return (0);
 }
