@@ -18,7 +18,7 @@ int execute_hshrc(void)
 	if (hshrc_fd == -1)
 		return (-1);
 	
-	return (execute_file(hshrc_fd, ""));
+	return (execute_file(hshrc_fd));
 }
 
 /**
@@ -37,5 +37,5 @@ int execute_arg(char *argv[])
 		perror(error_msg);
 		return (errno);
 	}   
-	return (execute_file(fd, "")));
+	return (execute_file(fd));
 }

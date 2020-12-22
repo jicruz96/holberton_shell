@@ -9,17 +9,13 @@
  **/
 int main(int argc, char *argv[])
 {
-	char *buf, *homedir;
-
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
 		exit(execute_arg(argv));
 
 	/* If no argument was passed, execute .hshrc */
 	execute_hshrc();
-	exit_status = execute_file(STDIN_FILENO);
-	post_work();
-	return (exit_status);
+	return (execute_file(STDIN_FILENO));
 }
 
 

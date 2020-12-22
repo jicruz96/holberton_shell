@@ -77,7 +77,7 @@ exec_f get_executor(command_t *command);
 
 void save_to_history(char *line, char **history);
 
-void free_everything(command_t *head);
+void free_command_chain(command_t *head);
 
 
 char *get_program_path(char *program);
