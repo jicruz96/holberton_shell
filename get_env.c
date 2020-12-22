@@ -7,7 +7,12 @@
  */
 char *get_env(char *key)
 {
-    char *value = "";
+	/* Loop through environ array */
 
-    return (value);
+		/* If environ[i] starts with the key (the part before the '=') */
+			/* return a strdup of the value (the part after the '=') */
+	/* end loop */
+
+	/* if key is not found in environment, return NULL */
+	return (NULL);
 }
