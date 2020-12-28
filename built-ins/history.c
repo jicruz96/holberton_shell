@@ -7,7 +7,10 @@
  **/
 int builtin_history(command_t *command)
 {
-    int status;
-    
-    return (status);
+	int i;
+
+	for (i = 0; command->args[i]; i++)
+		printf("%5d  %s", i, command->args[i]);
+
+	return (0);
 }
