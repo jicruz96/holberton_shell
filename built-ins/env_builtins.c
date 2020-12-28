@@ -7,9 +7,12 @@
  **/
 int builtin_env(command_t *command)
 {
-    int status;
-    
-    return (status);
+	int i;
+
+	for (i = 0; environ[i]; i++)
+		dprintf(command->output, "%s\n", environ[i]);
+
+	return (0);
 }
 
 /**
