@@ -9,15 +9,15 @@ int execute_hshrc(void)
 	char *homedir, path[256];
 
 	/* create path for hshrc */
-	homedir = getenv("HOME");
-	sprintf(path, %s/%s, homedir, ".hshrc");
+	homedir = _getenv("HOME");
+	sprintf(path, "%s/%s", homedir, ".hshrc");
 	free(homedir);
 
 	/* go get .hshrc file descriptor */
 	hshrc_fd = open(path, O_RDONLY);
 	if (hshrc_fd == -1)
 		return (-1);
-	
+
 	return (execute_file(hshrc_fd));
 }
 
@@ -36,6 +36,6 @@ int execute_arg(char *argv[])
 		sprintf(error_msg, "%s: %s", argv[0], argv[1]);
 		perror(error_msg);
 		return (errno);
-	}   
+	}
 	return (execute_file(fd));
 }

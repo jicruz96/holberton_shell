@@ -5,8 +5,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include "strings/my_strings.h"
+
+#define HISTSIZE       4096
 
 #define DEFAULT_LOGIC   0000
 
@@ -27,6 +31,10 @@
 #define PIPE            (IS_PIPE_WRITER | IS_PIPE_READER)
 #define IS_PIPE(x)      ((x) & (PIPE))
 
+#define true 1
+#define false 0
+#define PS2 "> "
+
 /**
  * struct command_s - command struct
  * @logic:      macro that determines logic (see macros above)
@@ -37,31 +45,37 @@
  * @input_fd:   input file descriptor
  * @output:     output name as string
  * @output_fd:  output file descriptor
+ * @line_no:    execution line number
  * @next:       pointer to next command struct
  * @prev:       pointer to previous command struct
  **/
 typedef struct command_s
 {
-    int logic;
-    char *command;
-    char *path;
-    char **args;
-    char *input;
-    int input_fd;
-    char *output
-    int output_fd;
-    struct command_s *next;
-    struct command_s *prev;
+	int logic;
+	char *command;
+	char *path;
+	char **args;
+	char *input;
+	int input_fd;
+	char *output;
+	int output_fd;
+	int line_no;
+	struct command_s *next;
+	struct command_s *prev;
 } command_t;
 
 typedef int (*exec_f)(command_t *);
 
+extern char **environ;
+
 int execute_arg(char *argv[]);
 int execute_hshrc(void);
-char *get_env(char *key);
+char *_getenv(char *key);
 char *get_prompt(int fd);
+int get_history(char *history[], int *history_size);
 int execute_file(int fd);
 command_t *command_node_init(char *path, char *command);
+
 
 
 int fork_and_exec(command_t *command);
@@ -75,8 +89,10 @@ int clean_and_exit(command_t *command);
 
 exec_f get_executor(command_t *command);
 
-void save_to_history(char *line, char **history);
+void save_line_to_history(char *line, char **history, int line_no);
+void save_history_to_file(char *history[], int history_fd, int line_no);
 
+void sigint_handler(int signum);
 void free_command_chain(command_t *head);
 
 
@@ -84,16 +100,10 @@ char *get_program_path(char *program);
 
 command_t *make_commands(char *tokens);
 
-char **tokenize(char *line);
+char **get_tokens(int fd);
 
-/* PROMPT-MAKING FUNCTIONS */
+int _strlen(char *str);
 
-/**
-* char *get_date(void);
-* char *get_host(void);
-* char *get_shellname(void);
-* char *get_username(void);
-* getcwd()
-**/
-
+char *_getline(const int fd);
+char *parse_line(char **string);
 #endif /* SHELL_H */
