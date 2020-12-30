@@ -2,15 +2,18 @@
 
 /**
  * builtin_history - custom history built-in
- * @command: command node
+ * @path: path (string)
+ * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_history(command_t *command)
+int builtin_history(char *path, char **args)
 {
 	int i;
 
-	for (i = 0; command->args[i]; i++)
-		printf("%5d  %s", i, command->args[i]);
+	(void)path;
+
+	for (i = 0; args[i]; i++)
+		printf("%5d  %s", i, args[i]);
 
 	return (0);
 }

@@ -15,13 +15,13 @@ char *_getenv(char *key)
 		if (_strlen(environ[i]) < key_len)
 			continue;
 
-		if (strncmp(key, environ[i], key_len))
+		if (_strncmp(key, environ[i], key_len))
 			continue;
 
 		if (environ[i][key_len] != '=')
 			continue;
 
-		return (environ[i] + key_len + 1);
+		return (_strdup(environ[i] + key_len + 1));
 	}
 
 	return (NULL);

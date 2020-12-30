@@ -7,44 +7,63 @@
  **/
 char *get_program_path(char *program)
 {
-	int i;
-	char *buffer, *PATH, **path;
+	int i, j;
+	char *buffer;
+	char *PATH, **paths, *path;
+	char *builtins[] = {"cd", "help", "alias", "setenv", "unsetenv", "exit", "history", "env", NULL};
+
+
+	/* If program is builtin, don't search path, just return copy of program */
+	for (i = 0; builtins[i]; i++)
+		if (_strcmp(builtins[i], program) == 0)
+			return (_strdup(program));
 
 	/* store the path in a variable */
-	PATH = getenv("PATH");
+	printf("getting PATH...\n");
+	PATH = _getenv("PATH");
+	printf("PATH is: %s\n", PATH);
 
-	/**
-	 * make some space for each part of the path
-	 * and for the buffer we will operate on */
-	path = malloc(sizeof(char *) * 100);
-	buffer = malloc(sizeof(char *) * 256);
+	/* make space for paths array and buffer */
+	paths = malloc(sizeof(char *) * 100);
+	buffer = malloc(sizeof(char) * 256);
 
 	/* get the first path */
-	buffer = strtok(PATH, ":");
+	path = strtok(PATH, ":");
 
 	/* concat the path with a / and the program name */
-	sprintf(buffer, "%s/%s", buffer, program);
+	sprintf(buffer, "%s/%s", path, program);
 
 	/* store our full program path into the path array */
-	path[0] = buffer;
+	paths[0] = buffer;
 
 	i = 1;
 	/* get the rest of the PATH */
-	while ((buffer = strtok(NULL, ":")))
+	printf("creating the path array...\n");
+	while ((path = strtok(NULL, ":")))
 	{
 		/* same thing, make a slash and the program name at the end of path */
-		sprintf(buffer, "%s/%s", buffer, program);
+		sprintf(buffer, "%s/%s", path, program);
 		/* add the path to the paths array */
-		path[i] = buffer;
+		paths[i] = strdup(buffer);
 		i++;
 	}
-
-	for (i = 0; path[i]; i++)
+	/* Check all the paths */
+	printf("checking the paths...\n");
+	for (i = 0; paths[i]; i++)
 	{
 		/* check to see if we can execute this file */
-		if (access(path[i], X_OK))
+		if (access(paths[i], X_OK) == 0)
+		{
+			printf("valid path detected!\n");
+			/* free all excess paths */
+			for (j = i + 1; paths[j]; j++)
+				free(paths[j]);
 			/* return the path */
-			return (path[i]);
+			printf("returning %s\n", paths[i]);
+			return (paths[i]);
+		}
+		free(paths[i]);
 	}
-	return (NULL);
+	/* If no paths worked and if it's not a builtin, then return program */
+	return (program);
 }
