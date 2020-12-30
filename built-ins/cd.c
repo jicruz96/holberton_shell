@@ -2,12 +2,13 @@
 
 /**
  * builtin_cd - custom cd (i.e. "change directory") built-in
- * @command: command node
+ * @path: path (string)
+ * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_cd(command_t *command)
+int builtin_cd(char *path, char **args)
 {
-    int status;
+    int status = 0;
     
     return (status);
 }

@@ -2,12 +2,13 @@
 
 /**
  * builtin_alias - custom alias built-in
- * @command: command node
+ * @path: string
+ * @args: string array
  * Return: exit status
  **/
-int builtin_alias(command_t *command)
+int builtin_alias(char *path, char **args)
 {
-    int status;
+    int status = 0;
     
     return (status);
 }

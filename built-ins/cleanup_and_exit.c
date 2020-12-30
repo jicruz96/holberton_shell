@@ -2,10 +2,11 @@
 
 /**
  * clean_and_exit - custom exit built-in
- * @command: command node
+ * @path: path (string)
+ * @args: arguments (string array)
  * Return: exit status
  **/
-int clean_and_exit(command_t *command)
+int builtin_exit(char *path, char **args)
 {
     int status;
     

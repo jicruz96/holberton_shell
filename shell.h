@@ -14,26 +14,22 @@
 
 #define DEFAULT_LOGIC   0000
 
-#define REDIR_OUT       0001
-#define REDIR_IN        0002
-#define APPEND          0004
-#define HEREDOC         0010
-#define REDIR           (IS_REDIR_OUT | IS_REDIR_IN | IS_APPEND | IS_HEREDOC)
-#define IS_REDIR(x)     ((x) & (REDIR))
-
-#define AND_OP          0020
-#define OR_OP           0040
-#define IS_AND(x)       ((x) & (AND_OP))
-#define IS_OR(x)        ((x) & (OR_OP))
-
-#define PIPE_WRITER     0100
-#define PIPE_READER     0200
-#define PIPE            (IS_PIPE_WRITER | IS_PIPE_READER)
-#define IS_PIPE(x)      ((x) & (PIPE))
+#define IS_REDIR_OUT       0001
+#define IS_REDIR_IN        0002
+#define IS_APPEND          0004
+#define IS_HEREDOC         0010
+#define IS_AND          0020
+#define IS_OR           0040
+#define IS_PIPE         0100
 
 #define true 1
 #define false 0
 #define PS2 "> "
+
+#ifndef COMMAND_STRUCT
+#define COMMAND_STRUCT
+
+typedef int (*exec_f)(char *, char **);
 
 /**
  * struct command_s - command struct
@@ -59,12 +55,14 @@ typedef struct command_s
 	int input_fd;
 	char *output;
 	int output_fd;
+	char *heredoc;
 	int line_no;
+	exec_f executor;
 	struct command_s *next;
 	struct command_s *prev;
 } command_t;
 
-typedef int (*exec_f)(command_t *);
+#endif /* COMMAND_STRUCT */
 
 extern char **environ;
 
@@ -74,36 +72,37 @@ char *_getenv(char *key);
 char *get_prompt(int fd);
 int get_history(char *history[], int *history_size);
 int execute_file(int fd);
-command_t *command_node_init(char *path, char *command);
-
-
+command_t *command_node_init(char *path);
 
 int fork_and_exec(command_t *command);
-int builtin_cd(command_t *command);
-int builtin_setenv(command_t *command);
-int builtin_unsetenv(command_t *command);
-int builtin_env(command_t *command);
-int builtin_alias(command_t *command);
-int builtin_history(command_t *command);
-int clean_and_exit(command_t *command);
 
-exec_f get_executor(command_t *command);
+int builtin_cd(char *path, char **args);
+int builtin_setenv(char *path, char**args);
+int builtin_alias(char *path, char **args);
+int builtin_help(char *path, char **args);
+int builtin_env(char *path, char **args);
+int builtin_setenv(char *path, char **args);
+int builtin_unsetenv(char *path, char **args);
+int builtin_history(char *path, char **args);
+int builtin_exit(char *path, char **args);
+int execute_command(char *path, char **args);
+
+
+exec_f get_executor(char *command);
 
 void save_line_to_history(char *line, char **history, int line_no);
 void save_history_to_file(char *history[], int history_fd, int line_no);
-
 void sigint_handler(int signum);
 void free_command_chain(command_t *head);
-
+void handle_redir(command_t *, char **, int *);
+void handle_and(command_t *, char **, int *);
+void handle_pipe(command_t *, char **, int *);
 
 char *get_program_path(char *program);
-
-command_t *make_commands(char *tokens);
-
-char **get_tokens(int fd);
-
-int _strlen(char *str);
-
 char *_getline(const int fd);
 char *parse_line(char **string);
+char **get_tokens(int fd);
+command_t *make_commands(char **tokens);
+
+int _strlen(char *str);
 #endif /* SHELL_H */
