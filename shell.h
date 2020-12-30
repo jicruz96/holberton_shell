@@ -10,24 +10,25 @@
 #include <sys/types.h>
 #include "strings/my_strings.h"
 
-#define HISTSIZE       4096
+#define HISTSIZE		4096
 
-#define DEFAULT_LOGIC   0000
 
-#define IS_REDIR_OUT       0001
-#define IS_REDIR_IN        0002
-#define IS_APPEND          0004
-#define IS_HEREDOC         0010
+#define DEFAULT_LOGIC	0000
+#define IS_REDIR_OUT	0001
+#define IS_REDIR_IN		0002
+#define IS_APPEND		0004
+#define IS_HEREDOC		0010
 #define IS_AND          0020
 #define IS_OR           0040
 #define IS_PIPE         0100
 
-#define true 1
-#define false 0
-#define PS2 "> "
+#define EXIT_ERROR 		0777
 
-#ifndef COMMAND_STRUCT
-#define COMMAND_STRUCT
+#define IS_NUMERIC(x) ((x) >= '0' && (x) <= '9')
+
+#define true			1
+#define false			0
+#define PS2				"> "
 
 typedef int (*exec_f)(char *, char **);
 
@@ -38,10 +39,9 @@ typedef int (*exec_f)(char *, char **);
  * @path:       command path as a dynamically-allocated string
  * @args:       array of arguments for command (first argument must be command)
  * @input:      input name as string
- * @input_fd:   input file descriptor
  * @output:     output name as string
- * @output_fd:  output file descriptor
- * @line_no:    execution line number
+ * @heredoc:	heredoc string (if it exists)
+ * @executor:	function that executes command
  * @next:       pointer to next command struct
  * @prev:       pointer to previous command struct
  **/
@@ -52,19 +52,33 @@ typedef struct command_s
 	char *path;
 	char **args;
 	char *input;
-	int input_fd;
 	char *output;
-	int output_fd;
 	char *heredoc;
-	int line_no;
 	exec_f executor;
 	struct command_s *next;
 	struct command_s *prev;
 } command_t;
 
-#endif /* COMMAND_STRUCT */
+/**
+ * struct shell_s - shell struct
+ * @name: shell name
+ * @history: shell history
+ * @lines: lines read
+ * @status: shell status
+ **/
+typedef struct shell_s
+{
+	char *name;
+	char **history;
+	int lines;
+	int status;
+	int interactive;
+	int run;
+} shell_t;
+
 
 extern char **environ;
+extern shell_t shell;
 
 int execute_arg(char *argv[]);
 int execute_hshrc(void);

@@ -11,14 +11,9 @@ command_t *command_node_init(char *command)
 	if (!new)
 		return (NULL);
 	new->logic = DEFAULT_LOGIC;
-	new->path = get_program_path(command);
-	printf("\tnew command's path is %s\n", new->path);
 	new->command = command;
-	new->input_fd = STDIN_FILENO;
-	new->output_fd = STDOUT_FILENO;
-	new->line_no = 0;
+	new->path = get_program_path(command);
 	new->executor = get_executor(command);
-	printf("\tnew command's executor is %p\n", new->executor);
 	new->heredoc = NULL;
 	new->input = NULL;
 	new->output = NULL;
