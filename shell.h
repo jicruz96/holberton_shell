@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/errno.h>
 #include <sys/types.h>
 #include "strings/my_strings.h"
 
@@ -30,7 +31,7 @@
 #define false			0
 #define PS2				"> "
 
-typedef int (*exec_f)(char *, char **);
+typedef int (*exec_f)(char **);
 
 /**
  * struct command_s - command struct
@@ -63,54 +64,63 @@ typedef struct command_s
  * struct shell_s - shell struct
  * @name: shell name
  * @history: shell history
+ * @run: if shell is running
  * @lines: lines read
  * @status: shell status
+ * @history_fd: history file descriptor
+ * @interactive: if shell is in interactive mode
+ * @history_size: size of history
  **/
 typedef struct shell_s
 {
 	char *name;
+	char *prompt;
 	char **history;
+	int run;
 	int lines;
 	int status;
+	int history_fd;
 	int interactive;
-	int run;
+	int history_size;
 } shell_t;
 
 
 extern char **environ;
 extern shell_t shell;
 
-int execute_arg(char *argv[]);
-int execute_hshrc(void);
+void execute_hshrc(void);
 char *_getenv(char *key);
 char *get_prompt(int fd);
 int get_history(char *history[], int *history_size);
-int execute_file(int fd);
+void execute_file(int fd);
 command_t *command_node_init(char *path);
 
 int fork_and_exec(command_t *command);
 
-int builtin_cd(char *path, char **args);
-int builtin_setenv(char *path, char**args);
-int builtin_alias(char *path, char **args);
-int builtin_help(char *path, char **args);
-int builtin_env(char *path, char **args);
-int builtin_setenv(char *path, char **args);
-int builtin_unsetenv(char *path, char **args);
-int builtin_history(char *path, char **args);
-int builtin_exit(char *path, char **args);
-int execute_command(char *path, char **args);
+int builtin_cd(char **args);
+int builtin_setenv(char**args);
+int builtin_alias(char **args);
+int builtin_help(char **args);
+int builtin_env(char **args);
+int builtin_setenv(char **args);
+int builtin_unsetenv(char **args);
+int builtin_history(char **args);
+int builtin_exit(char **args);
+int execute_command(char **args);
 
 
 exec_f get_executor(char *command);
 
-void save_line_to_history(char *line, char **history, int line_no);
-void save_history_to_file(char *history[], int history_fd, int line_no);
+void save_line_to_history(char *line);
+void save_history_to_file(void);
 void sigint_handler(int signum);
 void free_command_chain(command_t *head);
 void handle_redir(command_t *, char **, int *);
 void handle_and(command_t *, char **, int *);
 void handle_pipe(command_t *, char **, int *);
+void shell_init(char *shellname, int input);
+void print_stupid(char *str, int fd);
+
 
 char *get_program_path(char *program);
 char *_getline(const int fd);
@@ -118,5 +128,7 @@ char *parse_line(char **string);
 char **get_tokens(int fd);
 command_t *make_commands(char **tokens);
 
+
+int handle_error(int code);
 int _strlen(char *str);
 #endif /* SHELL_H */

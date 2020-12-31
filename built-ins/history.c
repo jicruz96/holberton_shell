@@ -6,11 +6,9 @@
  * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_history(char *path, char **args)
+int builtin_history(char **args)
 {
 	int i;
-
-	(void)path;
 
 	for (i = 0; args[i]; i++)
 		printf("%5d  %s", i, args[i]);

@@ -5,22 +5,25 @@
  * @fd: file descriptor
  * Return: exit status
  **/
-int execute_file(int fd)
+void execute_file(int fd)
 {
-	char *prompt = get_prompt(fd);
-	int status;
+	char **tokens = NULL;
+	char *prompt = isatty(fd) ? shell.prompt : "";
+	command_t *commands = NULL;
 
 	while (shell.run)
 	{
+		write(fd, prompt, _strlen(prompt));
 		signal(SIGINT, sigint_handler);
-		printf("%s", prompt);
-		args = get_tokens(fd);
-		if (args == NULL)
+		tokens = get_tokens(fd);
+		if (tokens == NULL)
 			break;
-		command = make_commands(args);
-		status = fork_and_exec(command);
-		free_command_chain(command);
+		commands = make_commands(tokens);
+		fork_and_exec(commands);
+		free_command_chain(commands);
+		free(tokens);
 	}
-	
-	return (status);
+
+	if (isatty(fd))
+		write(fd, "\n", 1);
 }

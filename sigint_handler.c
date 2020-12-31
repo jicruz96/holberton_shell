@@ -6,5 +6,8 @@
  **/
 void sigint_handler(int signum)
 {
-	return;
+	(void)signum;
+
+	write(STDOUT_FILENO, "\n", 1);
+	write(STDOUT_FILENO, shell.prompt, _strlen(shell.prompt));
 }

@@ -22,16 +22,3 @@ command_t *command_node_init(char *command)
 	new->prev = NULL;
 	return (new);
 }
-
-
-
-/**
- * execute_command - wrapper for execve
- * @path: command path
- * @args: command args
- * Return: status
- **/
-int execute_command(char *path, char **args)
-{
-	return (execve(path, args, environ));
-}

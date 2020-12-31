@@ -6,9 +6,10 @@
  * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_cd(char *path, char **args)
+int builtin_cd(char **args)
 {
     int status = 0;
     
+    (void)args;
     return (status);
 }

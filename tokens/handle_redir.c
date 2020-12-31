@@ -12,18 +12,11 @@ void handle_redir(command_t *command, char **tokens, int *i)
 	if (tokens[*i][0] == '<') /* It's a '<' */
 	{
 		if (tokens[*i][1] == '<') /* it's a heredoc */
-		{
 			command->logic |= IS_HEREDOC;
-			/* tokens[i + 1] should equal the entire heredoc text */
-			*i += 1;
-			command->heredoc = tokens[*i];
-		}
-		else /* it's an input redirect! */
-		{
+		else 					/* it's an input redirect! */
 			command->logic |= IS_REDIR_IN;
-			*i += 1;
-            command->input = tokens[*i];
-		}
+		*i += 1;
+		command->input = tokens[*i];
 	}
 	else /* It's a '>' */
 	{

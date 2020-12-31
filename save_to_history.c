@@ -11,38 +11,52 @@ void save_line_to_history(char *line)
 	static int end_index = HISTSIZE - 1;
 	static int current_index;
 	static size_t history_size = HISTSIZE;
+	size_t i;
 
 	if (current_index == 0)
-		current_index = shell.lines;
+		current_index = shell.history_size;
 
 	if (current_index > end_index)
 	{
-		history = realloc(history, history_size + HISTSIZE);
+		shell.history = realloc(shell.history, history_size + HISTSIZE);
 		for (i = history_size; i < HISTSIZE + history_size; i++)
-			history[i] = NULL;
+			shell.history[i] = NULL;
 		history_size += HISTSIZE;
 		end_index = history_size - 2;
 	}
-	history[current_index] = line;
+	shell.history[current_index] = line;
 	current_index += 1;
 }
 
 /**
  * save_history_to_file - saves a line to history array
- * @history: history array
- * @history_fd: file descriptor of history file
- * @line_no: where to start
  **/
-void save_history_to_file(int history_fd, int line_no)
+void save_history_to_file(void)
 {
-	char **line = history + line_no;
+	int i;
 
-	while (*line)
+	for (i = shell.history_size; shell.history[i]; i++)
 	{
-		write(history_fd, *line, _strlen(*line));
-		free(*line);
-		line += 1;
+		write(shell.history_fd, shell.history[i], _strlen(shell.history[i]));
+		free(shell.history[i]);
 	}
-	free(history);
-	close(history_fd);
+	free(shell.history);
+	close(shell.history_fd);
+}
+
+/**
+ * print_stupid - print \n instead of newline
+ * @str: string to print
+ **/
+void print_stupid(char *str, int fd)
+{
+    char *stupid = "\\n";
+    if (!str)
+        return;
+    for (;*(str+1); str++)
+        if (*str != '\n')
+            write(fd, str, 1);
+        else
+            write(fd, stupid, 2);
+    write(fd, "\n", 1);
 }

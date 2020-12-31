@@ -6,9 +6,10 @@
  * @args: string array
  * Return: exit status
  **/
-int builtin_alias(char *path, char **args)
+int builtin_alias(char **args)
 {
     int status = 0;
-    
+
+    (void)args;
     return (status);
 }
