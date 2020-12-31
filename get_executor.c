@@ -6,8 +6,6 @@
  **/
 exec_f get_executor(char *command)
 {
-	int i;
-
 	/* If command is a built-in, return the corresponding built-in executor function */
 	/* Else, return regular execution function */
 
@@ -26,5 +24,5 @@ exec_f get_executor(char *command)
 	else if (_strcmp("exit", command) == 0)
 		return (&builtin_exit);
 
-	return (&execute_command);		
+	return (NULL);		
 }

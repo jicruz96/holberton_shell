@@ -1,7 +1,7 @@
 #include "shell.h"
 
 
-shell_t shell = {NULL, NULL, 0, 0};
+shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
 
 /**
  * main - entry point to shell
@@ -12,13 +12,14 @@ shell_t shell = {NULL, NULL, 0, 0};
  **/
 int main(int argc, char *argv[])
 {
-	int history_fd, history_size, status, fd = STDIN_FILENO;
+	int fd = STDIN_FILENO;
+	char *error_msg = NULL;
 
 
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
 	{
-		fd = open(filename, O_RDONLY);
+		fd = open(argv[1], O_RDONLY);
 		if (fd == -1)
 		{
 			sprintf(error_msg, "%s: %s", argv[0], argv[1]);
@@ -27,19 +28,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* fd is either STDIN or the argument file descriptor */
 	shell_init(argv[0], fd);
 
 	if (shell.interactive)
-	{
-		history_fd = get_history(shell.history, &history_size);
-		status = execute_hshrc();
-	}
+		execute_hshrc();
 
-	status = execute_file(fd);
+	execute_file(fd);
 	if (shell.interactive)
-		save_history_to_file(history_fd, history_size);
-	return (status);
+		save_history_to_file();
+	return (shell.status);
 }
+
 
 /**
  * shell_init - initializes new shell session
@@ -48,13 +48,19 @@ int main(int argc, char *argv[])
  **/
 void shell_init(char *shellname, int input)
 {
-	shell.name = argv[0];
-	shell.interactive = isatty(input);
-	if (shell.interactive)
-	{
-		shell.history = malloc(sizeof(char *) * HISTSIZE);
-		for (i = 0; i < HISTSIZE; i++)
-			shell.history[i] = NULL;
-	}
+    int i;
 
+    shell.name = shellname;
+	shell.prompt = get_prompt(input);
+    shell.interactive = isatty(input);
+	shell.status = 0;
+    if (shell.interactive)
+    {
+            shell.history = malloc(sizeof(char *) * HISTSIZE);
+            for (i = 0; i < HISTSIZE; i++)
+                    shell.history[i] = NULL;
+            shell.history_fd = get_history(shell.history, &shell.history_size);
+    }
+	shell.lines = 1;
+	shell.run = true;
 }

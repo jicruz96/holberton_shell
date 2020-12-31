@@ -13,51 +13,37 @@ int fork_and_exec(command_t *command)
 	int stdout_cpy = dup(STDOUT_FILENO);
 	int input_fd = STDIN_FILENO;
 	int output_fd = STDOUT_FILENO;
-	int fd;
 	int pipefds[2];
 	int perms;
-	int i;
 	command_t *tmp;
 
 	for (tmp = command; tmp; tmp = tmp->next)
 	{
 		/* Get input_fd if is_redir_in */
-		if (tmp->input)
+		if (tmp->logic & IS_REDIR_IN)
 		{
 			/* try to open input */
-			fd = open(tmp->input, O_RDONLY);
+			input_fd = open(tmp->input, O_RDONLY);
 			/* if file doesn't exist, go to end */
-			if (fd == -1)
+			if (input_fd == -1)
 			{
-				status = handle_error(errno);
+				shell.status = handle_error(errno);
 				goto END;
-			}
-
-			/* if input is stdin, set input to this file instead */
-			if (input_fd == STDIN_FILENO)
-			{
-				input_fd = fd;
-			}
-			/* if input is not stdin, it's a pipe from a previous cmd */
-			else
-			{
-				/* this will require its own logic but i'll come back to it */
-				input_fd = fd;
 			}
 		}
 		
 		/* Get input_fd if is_heredoc */
-		if ((tmp->logic & IS_HEREDOC) && !tmp->args[1])
+		if ((tmp->logic & IS_HEREDOC) && tmp->args[1] == NULL)
 		{
 			/* make pipe for heredoc */
 			if (pipe(pipefds) == -1)
 			{
-				status = handle_error(errno);
+				shell.status = handle_error(errno);
 				goto END;
 			}
 
 			/* write contents onto pipe */
-			write(pipefds[1], tmp->heredoc, _strlen(tmp->args[i]));
+			write(pipefds[1], tmp->input, _strlen(tmp->input));
 
 			/* close writing side of pipe */
 			close(pipefds[1]);
@@ -70,37 +56,38 @@ int fork_and_exec(command_t *command)
 		if (tmp->output)
 		{
 			perms = O_CREAT | O_RDWR;
-			if (tmp->logic == IS_APPEND)
+			if (tmp->logic & IS_APPEND)
 				perms |= O_APPEND;
 			else
 				perms |= O_TRUNC;
-			output_fd = open(tmp->output, perms);
+			output_fd = open(tmp->output, perms, 0644);
 			if (output_fd == -1)
 			{
-				status = handle_error(errno);
+				shell.status = handle_error(errno);
 				goto END;
 			}
 		}
 
-		/* Get output_fd if is_pipe_writer */	
-		if (tmp->logic & IS_PIPE_WRITER)
+		/* Get output_fd if is_pipe */	
+		if (tmp->logic & IS_PIPE)
 		{
 			if (pipe(pipefds) == -1)
 			{
-				status = handle_error(errno);
+				shell.status = handle_error(errno);
 				goto END;
 			}
 			output_fd = pipefds[1];
 		}
 		
+
 		if (dup2(input_fd, STDIN_FILENO) == -1)	/* dup2 should never fail but just in case */
 		{
-			status = handle_error(errno);
+			shell.status = handle_error(errno);
 			goto END;
 		}
 		if (dup2(output_fd, STDOUT_FILENO) == -1)	/* dup2 should never fail but just in case */
 		{
-			status = handle_error(errno)
+			shell.status = handle_error(errno);
 			goto END;
 		}
 
@@ -110,15 +97,20 @@ int fork_and_exec(command_t *command)
 		/* Child executes */
 		if (child_pid == 0)
 		{
-			tmp->executor(tmp->path, tmp->args));
-			return (handle_error(errno));
+			if (tmp->executor)
+				shell.status = tmp->executor(tmp->args);
+			else
+				shell.status = execve(tmp->path, tmp->args, environ);
+			if (shell.run && shell.status)
+				return (handle_error(errno));
+			return (shell.status);
 		}
 		
 		/* Parent waits (or detects forking error) */
 		if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
-			status = handle_error(errno);
+			shell.status = handle_error(errno);
 		else
-			status = WEXITSTATUS(status);
+			shell.status = WEXITSTATUS(status);
 		
 		END:
 
@@ -129,7 +121,7 @@ int fork_and_exec(command_t *command)
 		/* Close and reset input_fd and output_fd */
 		if (input_fd > 2)
 			close(input_fd);
-		if (tmp->logic & IS_PIPE_WRITER)
+		if (tmp->logic & IS_PIPE)
 			input_fd = pipefds[0];
 		else
 			input_fd = STDIN_FILENO;
@@ -138,15 +130,15 @@ int fork_and_exec(command_t *command)
 		output_fd = STDOUT_FILENO;
 
 		/* Check command logic to see if we continue executing */
-		if (status && (tmp->logic & AND_OP))
+		if (shell.status && (tmp->logic & IS_AND))
 			break;
-		if (!status && (tmp->logic & OR_OP))
+		if (!shell.status && (tmp->logic & IS_OR))
 			break; 
 		if (shell.run == false)
 			break;
 	}
 
-	return (status);
+	return (shell.status);
 
 }
 
@@ -167,7 +159,8 @@ int handle_error(int code)
  * @args: args
  * Return: status
  **/
-int execute_command(char *path, char **args)
+int execute_command(char **args)
 {
-	return (execve(path, args, environ));
+	printf("we are executing %s\n", args[0]);
+	return (execve(args[0], args, environ));
 }

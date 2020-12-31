@@ -7,11 +7,10 @@
  * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_exit(char *path, char **args)
+int builtin_exit(char **args)
 {
     int status = 0;
-
-    (void)path;
+    int i;
 
     if (args[1])
     {

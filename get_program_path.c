@@ -19,9 +19,7 @@ char *get_program_path(char *program)
 			return (_strdup(program));
 
 	/* store the path in a variable */
-	printf("getting PATH...\n");
 	PATH = _getenv("PATH");
-	printf("PATH is: %s\n", PATH);
 
 	/* make space for paths array and buffer */
 	paths = malloc(sizeof(char *) * 100);
@@ -36,30 +34,24 @@ char *get_program_path(char *program)
 	/* store our full program path into the path array */
 	paths[0] = buffer;
 
-	i = 1;
 	/* get the rest of the PATH */
-	printf("creating the path array...\n");
-	while ((path = strtok(NULL, ":")))
+	for (i = 1; (path = strtok(NULL, ":"));)
 	{
 		/* same thing, make a slash and the program name at the end of path */
 		sprintf(buffer, "%s/%s", path, program);
 		/* add the path to the paths array */
-		paths[i] = strdup(buffer);
-		i++;
+		paths[i++] = strdup(buffer);
 	}
 	/* Check all the paths */
-	printf("checking the paths...\n");
 	for (i = 0; paths[i]; i++)
 	{
 		/* check to see if we can execute this file */
 		if (access(paths[i], X_OK) == 0)
 		{
-			printf("valid path detected!\n");
 			/* free all excess paths */
 			for (j = i + 1; paths[j]; j++)
 				free(paths[j]);
 			/* return the path */
-			printf("returning %s\n", paths[i]);
 			return (paths[i]);
 		}
 		free(paths[i]);

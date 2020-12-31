@@ -6,13 +6,14 @@
  * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_env(char *path, char **args)
+int builtin_env(char **args)
 {
 	int i;
 
 	for (i = 0; environ[i]; i++)
 		printf("%s\n", environ[i]);
 
+    (void)args;
 	return (0);
 }
 
@@ -22,10 +23,11 @@ int builtin_env(char *path, char **args)
  * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_setenv(char *path, char **args)
+int builtin_setenv(char **args)
 {
     int status = 0;
     
+    (void)args;
     return (status);
 }
 
@@ -35,9 +37,10 @@ int builtin_setenv(char *path, char **args)
  * @args: arguments (string array)
  * Return: exit status
  **/
-int builtin_unsetenv(char *path, char **args)
+int builtin_unsetenv(char **args)
 {
     int status = 0;
     
+    (void)args;
     return (status);
 }

@@ -8,5 +8,5 @@
 char *get_prompt(int fd)
 {
 	/* does fd refer to a terminal? yes? return prompt. else, empty str */
-	return (isatty(fd) ? "S " : "");
+	return (isatty(fd) ? "shell: " : "");
 }
