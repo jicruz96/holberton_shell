@@ -6,6 +6,5 @@
  **/
 void sigint_handler(int signum)
 {
-	if (signum == 2)
-		printf("\n$ ");
+	return;
 }

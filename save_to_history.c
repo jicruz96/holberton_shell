@@ -6,19 +6,20 @@
  * @history: history array
  * @line_no: line number
  **/
-void save_line_to_history(char *line, char *history[], int line_no)
+void save_line_to_history(char *line)
 {
 	static int end_index = HISTSIZE - 1;
 	static int current_index;
 	static size_t history_size = HISTSIZE;
 
 	if (current_index == 0)
-		current_index = line_no;
+		current_index = shell.lines;
 
 	if (current_index > end_index)
 	{
 		history = realloc(history, history_size + HISTSIZE);
-		memset(history + history_size, 0, HISTSIZE);
+		for (i = history_size; i < HISTSIZE + history_size; i++)
+			history[i] = NULL;
 		history_size += HISTSIZE;
 		end_index = history_size - 2;
 	}
@@ -32,13 +33,14 @@ void save_line_to_history(char *line, char *history[], int line_no)
  * @history_fd: file descriptor of history file
  * @line_no: where to start
  **/
-void save_history_to_file(char *history[], int history_fd, int line_no)
+void save_history_to_file(int history_fd, int line_no)
 {
 	char **line = history + line_no;
 
 	while (*line)
 	{
 		write(history_fd, *line, _strlen(*line));
+		free(*line);
 		line += 1;
 	}
 	free(history);

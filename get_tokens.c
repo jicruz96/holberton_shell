@@ -16,11 +16,6 @@ char **get_tokens(int fd)
 	if (line == NULL)
 		return (NULL);
 
-	/**
-	 * notice: to prevent memory leaks we have to save line pointer in another
-	 * variable because we will lose this reference in the parse_line function
-	 * i'm saving it in a variable called 'home'
-	 d**/
 	home = line;
 
 	/*  Create array for 256 tokens (strings) */
@@ -86,12 +81,6 @@ char **get_tokens(int fd)
 			/* get the end tag */
 			end_tag = parse_line(&line);
 
-			/**
-			 * when we're done with the heredoc, we have to continue
-			 * with the rest of this original line, so let's store
-			 * the rest of the line elsewhere and when we're done, we'll
-			 * reset.
-			 **/
 			tmp = _strdup(line);
 
 			/* about to get a new line, so free reference to previous one */
@@ -140,78 +129,41 @@ char **get_tokens(int fd)
  **/
 char *parse_line(char **line)
 {
-	char *token, delims[] = {' ', '\t', '#', '"', '\n', '>', '<', ';', '\0'};
-	int i, j;
+	char *token, *delims = " \"\t\n#><&|;";
+	int i = 0, j = 0;
 
-	/* If line is null or points to null byte, return NULL */
-	if (!line || !(*line) || !(**line))
+	if (!line || !(*line))
 		return (NULL);
-
-	/* Get ahead of whitespace */
+	
 	while (**line == ' ' || **line == '\t')
 		(*line)++;
 
-	/* If line starts with '"' , find the closing '"' */
-	if (**line == '"')
+	if (!(**line) || **line == '#' || **line == '\n')
+		return (NULL);
+	
+	/* detect delimiters */
+	i += (**line == ';');
+	i += (**line == '>') * (1 + ((*line)[1] == '>'));
+	i += (**line == '<') * (1 + ((*line)[1] == '<'));
+	i += (**line == '&') * (1 + ((*line)[1] == '&'));
+	i += (**line == '|') * (1 + ((*line)[1] == '|'));
+	
+	
+	if (!i)			/* if no delimiters detected, find end of token */
 	{
+		if (**line == '"')
+			delims = "\"";
+
 		for (i = 1; (*line)[i]; i++)
-			if ((*line)[i] == '"')
-			{
-				token = _strndup(*line, i + 1);
-				*line = *line + i + 1;
-				return (token);
-			}
-	}
-	/* Else, if line is a separating token, return this token */
-	else if (**line == '>' || **line == '<' || **line == ';')
-	{
-		i = 1;
-		/* if token is a redirect, check for second redirect character */
-		if (**line == '>' || **line == '<')
-			if (*(*line + 1) == '>' || *(*line + 1) == '<')
-				i += 1;
-		/* duplicate the one (or 2) character(s) over */
-		token = _strndup(*line, i);
-		*line = *line + i;
-		return (token);
-	}
-	/* else, search for next delimiter in line */
-	else
-	{
-		for (i = 0; (*line)[i]; i++)
 			for (j = 0; delims[j]; j++)
 				if ((*line)[i] == delims[j])
-				{
-					/**
-					 * if delimiter is comment or newline, the line is as
-					 * good as over. set line to NULL
-					 **/
-					if ((*line)[i] == '#' || (*line)[i] == '\n')
-					{
-						*line = NULL;
-						return (NULL);
-					}
-					token = _strndup(*line, i);
-					/**
-					 * else if delimiter is whitespace, set line to point to
-					 * next character after the whitespace character
-					 **/
-					if ((*line)[i] == ' ' || (*line)[i] == '\t')
-						*line = *line + i + 1;
-					/**
-					 * else, delimiter is an opening double quote or separator,
-					 * set the line to point to it so that the next time around
-					 * it triggers the appropriate logic
-					 **/
-					else
-						*line = *line + i;
-					return (token);
-				}
+					goto LOOP_EXIT;
+		
+		/* adjust i value (for double quote edge case) */
+		LOOP_EXIT: i += (**line == '"' && (*line)[i] == '"');
 	}
 
-	/* if no delimiter found, return remainder of line */
-	token = _strdup(*line);
-	/* since we've parsed the whole line, line is over. set to null */
-	*line = NULL;
+	token = _strndup(*line, i);
+	*line += i;
 	return (token);
 }

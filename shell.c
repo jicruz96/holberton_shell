@@ -1,5 +1,8 @@
 #include "shell.h"
 
+
+shell_t shell = {NULL, NULL, 0, 0};
+
 /**
  * main - entry point to shell
  * @argc: arg count
@@ -9,32 +12,49 @@
  **/
 int main(int argc, char *argv[])
 {
+	int history_fd, history_size, status, fd = STDIN_FILENO;
+
+
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
-		exit(execute_arg(argv));
+	{
+		fd = open(filename, O_RDONLY);
+		if (fd == -1)
+		{
+			sprintf(error_msg, "%s: %s", argv[0], argv[1]);
+			perror(error_msg);
+			return (errno);
+		}
+	}
 
-	/* If no argument was passed, execute .hshrc */
-	execute_hshrc();
-	return (execute_file(STDIN_FILENO));
+	shell_init(argv[0], fd);
+
+	if (shell.interactive)
+	{
+		history_fd = get_history(shell.history, &history_size);
+		status = execute_hshrc();
+	}
+
+	status = execute_file(fd);
+	if (shell.interactive)
+		save_history_to_file(history_fd, history_size);
+	return (status);
 }
 
+/**
+ * shell_init - initializes new shell session
+ * @shellname: shell name
+ * @input: true if shell session is interactive, false if not
+ **/
+void shell_init(char *shellname, int input)
+{
+	shell.name = argv[0];
+	shell.interactive = isatty(input);
+	if (shell.interactive)
+	{
+		shell.history = malloc(sizeof(char *) * HISTSIZE);
+		for (i = 0; i < HISTSIZE; i++)
+			shell.history[i] = NULL;
+	}
 
-	
-	/* 
-	/* checking for file as arg and .hshrc and doing the PS1 */
-
-	/*********************** FLOW *********************/
-	/*
-	prompt = get_prompt()
-	
-	main_loop()	
-		getline(input)
-		tokenize(line)
-		make_commands() -> returns command class with logic, name, input, output attributes
-		for command in commands:
-			pre_exec()
-			execute(commands)
-			save_command_to_history()
-	post_work() /* saving the history, freeing_shit
-	return (exit_status);*/
 }
