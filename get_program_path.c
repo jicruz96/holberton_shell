@@ -33,5 +33,6 @@ char *get_program_path(char *program)
 	}
 
 	free(PATH);
+	free(buffer);
 	return (_strdup(program));
 }

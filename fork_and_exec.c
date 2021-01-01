@@ -9,7 +9,7 @@ int fork_and_exec(command_t *command)
 {
 	pid_t child_pid;
 	int stdin_cpy = dup(STDIN_FILENO), stdout_cpy = dup(STDOUT_FILENO);
-	int input_fd, output_fd = STDOUT_FILENO, pipefds[2], status = 0;
+	int input_fd = STDIN_FILENO, output_fd, pipefds[2], status = 0;
 	command_t *tmp;
 
 	for (tmp = command; tmp && shell.run; tmp = tmp->next)
@@ -19,10 +19,8 @@ int fork_and_exec(command_t *command)
 		output_fd = get_output_fd(tmp);
 		if (tmp->logic & IS_PIPE)
 			pipe(pipefds), output_fd = pipefds[1];
-
 		dup2(input_fd, STDIN_FILENO), dup2(output_fd, STDOUT_FILENO);
 		child_pid = fork();
-
 		if (child_pid == 0) /* child executes */
 		{
 			if (tmp->executor)
@@ -33,13 +31,11 @@ int fork_and_exec(command_t *command)
 				exit(handle_error(errno));
 			exit(shell.status);
 		}
-
 		/* Parent waits (or detects forking error) */
 		if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
 			shell.status = handle_error(errno);
 		else
 			shell.status = WEXITSTATUS(status);
-
 		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
 		if (clean_pipes(tmp, &input_fd, &output_fd) == false)
 		{
@@ -50,7 +46,6 @@ int fork_and_exec(command_t *command)
 		if (tmp->logic & IS_PIPE)
 			input_fd = pipefds[0];
 	}
-
 	return (shell.status);
 }
 
@@ -94,13 +89,9 @@ int get_input_fd(command_t *cmd)
 		/* close writing side of pipe */
 		close(pipefds[1]);
 
-		printf("returning pipefd %d\n", pipefds[0]);
-
 		/* set input to reading side of pipe */
 		return (pipefds[0]);
 	}
-
-	printf("getting input fd: %s\n", cmd->args[1]);
 
 	return (STDIN_FILENO);
 }
@@ -110,6 +101,7 @@ int get_input_fd(command_t *cmd)
  * @cmd: cmd
  * @input_fd: input fd
  * @output_fd: output_fd
+ * Return: true or false
  **/
 int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 {
@@ -121,7 +113,7 @@ int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 
 	*input_fd = STDIN_FILENO;
 	*output_fd = STDOUT_FILENO;
-	
+
 	if (shell.status && (cmd->logic & IS_AND))
 		return (false);
 	if (!shell.status && (cmd->logic & IS_OR))
