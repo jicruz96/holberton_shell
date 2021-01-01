@@ -3,6 +3,7 @@
 from os import popen, chdir, getcwd
 from sys import argv
 import subprocess as sp
+from time import sleep
 
 output = """
 
@@ -14,7 +15,7 @@ output = """
         HSH:
         $   {}
         $   exit status: {}
-        $   error msg: {}
+        $   error msg: [{}]
     """
 
 
@@ -80,17 +81,18 @@ HOME = getcwd()
 # Check each command
 results = ''
 for command in commands:
+    command = command[:-1]
     if command == '':
         continue
-    sh_out, sh_err, sh_code = shelltest(command, '/bin/sh')
     hsh_out, hsh_err, hsh_code = shelltest(command, './hsh')
+    sh_out, sh_err, sh_code = shelltest(command, '/bin/sh')
 
-    hsh_err = hsh_err.replace('./hsh', '/bin/sh')
+    # hsh_err = hsh_err.replace('./hsh', '/bin/sh')
     chdir(HOME)
 
     if sh_out != hsh_out or sh_err != hsh_err or sh_code != hsh_code:
-        print(output.format(command, sh_out, sh_err,
-                            sh_code, hsh_out, hsh_err, hsh_code))
+        print(output.format(command, sh_out, sh_code,
+                            sh_err, hsh_out, hsh_code, hsh_err))
         print('------------------------------------------')
         results += '❌'
     else:

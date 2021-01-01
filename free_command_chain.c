@@ -9,6 +9,9 @@ void free_command_chain(command_t *head)
 	int i;
 
 	/* Must free path and node itself */
+	if (!head)
+		return;
+
 	free(head->path);
 	free(head->input);
 	free(head->output);
