@@ -55,7 +55,7 @@ char **get_tokens(int fd)
  **/
 char *get_heredoc(char **line, int fd)
 {
-	char *token = _strdup(""), *end_tag = parse_line(line), *tmp;
+	char *token = NULL, *end_tag = parse_line(line), *tmp;
 	int token_length = 0, searching_for_end_tag = true;
 
 	while (searching_for_end_tag)

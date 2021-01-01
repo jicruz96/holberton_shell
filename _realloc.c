@@ -9,14 +9,14 @@
 char *_realloc(char *p, int size)
 {
 	char *new;
-	int i;
-
-	if (!p)
-		return (malloc(sizeof(char) * size));
+	int i = 0;
 
 	new = malloc(sizeof(char) * size);
-	for (i = 0; p[i] && i < size; i++)
-		new[i] = p[i];
+	if (p)
+		for (i = 0; p[i] && i < size; i++)
+			new[i] = p[i];
+	for (; i < size; i++)
+		new[i] = '\0';
 	free(p);
 	return (new);
 }
