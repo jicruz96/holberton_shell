@@ -127,7 +127,7 @@ char *parse_line(char **string);
 char **get_tokens(int fd);
 command_t *make_commands(char **tokens);
 
-void clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
+int clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
 
 char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);

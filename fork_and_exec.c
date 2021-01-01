@@ -41,7 +41,12 @@ int fork_and_exec(command_t *command)
 			shell.status = WEXITSTATUS(status);
 
 		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
-		clean_pipes(tmp, &input_fd, &output_fd);
+		if (clean_pipes(tmp, &input_fd, &output_fd) == false)
+		{
+			if (tmp->logic & IS_PIPE)
+				close(pipefds[0]);
+			break;
+		}
 		if (tmp->logic & IS_PIPE)
 			input_fd = pipefds[0];
 	}
@@ -89,9 +94,13 @@ int get_input_fd(command_t *cmd)
 		/* close writing side of pipe */
 		close(pipefds[1]);
 
+		printf("returning pipefd %d\n", pipefds[0]);
+
 		/* set input to reading side of pipe */
 		return (pipefds[0]);
 	}
+
+	printf("getting input fd: %s\n", cmd->args[1]);
 
 	return (STDIN_FILENO);
 }
@@ -102,14 +111,8 @@ int get_input_fd(command_t *cmd)
  * @input_fd: input fd
  * @output_fd: output_fd
  **/
-void clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
+int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 {
-	if (shell.status && (cmd->logic & IS_AND))
-		shell.run = false;
-	if (!shell.status && (cmd->logic & IS_OR))
-		shell.run = false;
-	if (_strcmp(cmd->command, "exit") == 0)
-		shell.run = false;
 
 	if (*input_fd > 2)
 		close(*input_fd);
@@ -118,6 +121,17 @@ void clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 
 	*input_fd = STDIN_FILENO;
 	*output_fd = STDOUT_FILENO;
+	
+	if (shell.status && (cmd->logic & IS_AND))
+		return (false);
+	if (!shell.status && (cmd->logic & IS_OR))
+		return (false);
+	if (_strcmp(cmd->command, "exit") == 0)
+	{
+		shell.run = false;
+		return (false);
+	}
+	return (true);
 }
 
 /**
