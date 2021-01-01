@@ -6,6 +6,7 @@
  */
 command_t *command_node_init(char *command)
 {
+	int i;
 	command_t *new = malloc(sizeof(command_t));
 
 	if (!new)
@@ -17,7 +18,10 @@ command_t *command_node_init(char *command)
 	new->heredoc = NULL;
 	new->input = NULL;
 	new->output = NULL;
-	new->args = NULL;
+	new->args = malloc(sizeof(char *) * 256);
+	new->args[0] = command;
+	for (i = 1; i < 256; i++)
+		new->args[i] = NULL;
 	new->next = NULL;
 	new->prev = NULL;
 	return (new);

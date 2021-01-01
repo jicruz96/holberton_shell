@@ -1,74 +1,48 @@
 #include "shell.h"
 
 /**
- * make_commands - makes linked list of commands and underlying logic from tokens
+ * make_commands - makes linked list of commands from tokens
  * @tokens: tokens array
  * Return: head of command_t list
  */
 command_t *make_commands(char **tokens)
 {
-	command_t *head = NULL, *tmp = NULL;
-	int i, j, arg_index;
-	char **args = NULL;
+	command_t *head = NULL, *cmd = NULL, *prev = NULL;
+	int i, j, k;
 
-	for (i = 0; tokens[i]; i++)
+	for (i = 0; tokens[i]; prev = cmd, free(tokens[j]), i++)
 	{
-		switch(tokens[i][0])
-		{
-			case '>':
-			case '<':
-				handle_redir(tmp, tokens, &i);
-				free(tokens[i - 1]);
-				break;
-			case '|':
-				handle_pipe(tmp, tokens, &i);
-				free(tokens[i]);
-				tmp->args = args;
-				args = NULL;;
-				break;
-			case '&':
-				handle_and(tmp, tokens, &i);
-				free(tokens[i]);
-				tmp->args = args;
-				args = NULL;
-				break;
-			case ';':
-				free(tokens[i]);
-				tmp->args = args;
-				args = NULL; 
-				break;
-			default:
-			/* If not a separator, save to args array */
-				/* if its a fresh new array, allocate memory for it, set index to 0, init new node */
-				if (args == NULL)
-				{
-					/* allocate memory for new args array */
-					args = malloc(sizeof(char *) * 256);
+		cmd = command_node_init(tokens[i++]);
+		if (prev)
+			prev->next = cmd;
+		else
+			head = cmd;
 
-					/* init all indexes of args to NULL */
-					for (j = 0; args[j]; j++)
-						args[j] = NULL;
+		for (j = i; tokens[j] && cmd->logic == 0;)
+			if (tokens[j][0] == '|')
+				cmd->logic |= (tokens[j][1] == '|') ? IS_OR : IS_PIPE;
+			else if (_strcmp(tokens[j], "&&") == 0)
+				cmd->logic |= IS_AND;
+			else if (tokens[j][0] != ';')
+				j++;
+			else
+				break;
 
-					/* reset the index counter to 0 */
-					arg_index = 0;
-
-					/* If a command exists, new command is its ->next */
-					if (tmp)
-					{
-						tmp->next = command_node_init(tokens[i]);
-						tmp = tmp->next;
-					}
-					else	/* first command! */
-					{
-						head = command_node_init(tokens[i]);
-						tmp = head;
-					}
-				}
-				/* Add token to args array */
-				args[arg_index++] = tokens[i];
-		}
+		for (k = 1; i < j; i++)
+			if (tokens[i][0] == '<')
+			{
+				cmd->logic |= (tokens[i][1] == '<') ? IS_HEREDOC : IS_REDIR_IN;
+				free(tokens[i++]), cmd->input = tokens[i];
+			}
+			else if (tokens[i][0] == '>')
+			{
+				cmd->logic |= (tokens[i][1] == '>') ? IS_APPEND : IS_REDIR_OUT;
+				free(tokens[i++]), cmd->output = tokens[i];
+			}
+			else
+			{
+				cmd->args[k++] = tokens[i];
+			}
 	}
-
-	tmp->args = args;
 	return (head);
 }

@@ -7,55 +7,31 @@
  **/
 char *get_program_path(char *program)
 {
-	int i, j;
-	char *buffer;
-	char *PATH, **paths, *path;
-	char *builtins[] = {"cd", "help", "alias", "setenv", "unsetenv", "exit", "history", "env", NULL};
-
+	int i;
+	char *PATH, *path = NULL, *buffer = NULL;
+	char *builtins[] = {"cd", "help", "alias", "setenv", "unsetenv", "exit",
+						"history", "env", NULL};
 
 	/* If program is builtin, don't search path, just return copy of program */
 	for (i = 0; builtins[i]; i++)
 		if (_strcmp(builtins[i], program) == 0)
 			return (_strdup(program));
 
-	/* store the path in a variable */
 	PATH = _getenv("PATH");
-
-	/* make space for paths array and buffer */
-	paths = malloc(sizeof(char *) * 100);
 	buffer = malloc(sizeof(char) * 256);
 
-	/* get the first path */
-	path = strtok(PATH, ":");
-
-	/* concat the path with a / and the program name */
-	sprintf(buffer, "%s/%s", path, program);
-
-	/* store our full program path into the path array */
-	paths[0] = buffer;
-
-	/* get the rest of the PATH */
-	for (i = 1; (path = strtok(NULL, ":"));)
+	/* check the PATH */
+	while ((path = strtok((path ? NULL : PATH), ":")))
 	{
-		/* same thing, make a slash and the program name at the end of path */
+		/* concat path with slash and program name */
 		sprintf(buffer, "%s/%s", path, program);
-		/* add the path to the paths array */
-		paths[i++] = strdup(buffer);
-	}
-	/* Check all the paths */
-	for (i = 0; paths[i]; i++)
-	{
-		/* check to see if we can execute this file */
-		if (access(paths[i], X_OK) == 0)
+		if (access(buffer, X_OK) == 0)
 		{
-			/* free all excess paths */
-			for (j = i + 1; paths[j]; j++)
-				free(paths[j]);
-			/* return the path */
-			return (paths[i]);
+			free(PATH);
+			return (buffer);
 		}
-		free(paths[i]);
 	}
-	/* If no paths worked and if it's not a builtin, then return program */
-	return (program);
+
+	free(PATH);
+	return (_strdup(program));
 }

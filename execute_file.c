@@ -20,10 +20,8 @@ void execute_file(int fd)
 			break;
 		commands = make_commands(tokens);
 		fork_and_exec(commands);
+		shell.lines++;
 		free_command_chain(commands);
 		free(tokens);
 	}
-
-	if (isatty(fd))
-		write(fd, "\n", 1);
 }

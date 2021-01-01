@@ -1,20 +1,17 @@
 #include "shell.h"
 
-
 shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
 
 /**
  * main - entry point to shell
  * @argc: arg count
  * @argv: argument array
- * @envp: environment variables array
  * Return: exit status
  **/
 int main(int argc, char *argv[])
 {
 	int fd = STDIN_FILENO;
 	char *error_msg = NULL;
-
 
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
@@ -35,11 +32,11 @@ int main(int argc, char *argv[])
 		execute_hshrc();
 
 	execute_file(fd);
+	_getline(-1);
 	if (shell.interactive)
 		save_history_to_file();
 	return (shell.status);
 }
-
 
 /**
  * shell_init - initializes new shell session
@@ -48,19 +45,19 @@ int main(int argc, char *argv[])
  **/
 void shell_init(char *shellname, int input)
 {
-    int i;
+	int i;
 
-    shell.name = shellname;
+	shell.name = shellname;
 	shell.prompt = get_prompt(input);
-    shell.interactive = isatty(input);
+	shell.interactive = isatty(input);
 	shell.status = 0;
-    if (shell.interactive)
-    {
-            shell.history = malloc(sizeof(char *) * HISTSIZE);
-            for (i = 0; i < HISTSIZE; i++)
-                    shell.history[i] = NULL;
-            shell.history_fd = get_history(shell.history, &shell.history_size);
-    }
+	if (shell.interactive)
+	{
+		shell.history = malloc(sizeof(char *) * HISTSIZE);
+		for (i = 0; i < HISTSIZE; i++)
+			shell.history[i] = NULL;
+		shell.history_fd = get_history(shell.history, &shell.history_size);
+	}
 	shell.lines = 1;
 	shell.run = true;
 }

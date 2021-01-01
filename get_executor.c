@@ -3,11 +3,15 @@
 /**
  * get_executor - returns pointer to appropriate executor function
  * @command: command (as a string)
+ * Return: function pointer
  **/
 exec_f get_executor(char *command)
 {
-	/* If command is a built-in, return the corresponding built-in executor function */
-	/* Else, return regular execution function */
+	/**
+	 * If command is a built-in, return the corresponding
+	 * built-in executor function
+	 * Else, return regular execution function
+	 */
 
 	if (_strcmp("cd", command) == 0)
 		return (&builtin_cd);
@@ -24,5 +28,5 @@ exec_f get_executor(char *command)
 	else if (_strcmp("exit", command) == 0)
 		return (&builtin_exit);
 
-	return (NULL);		
+	return (NULL);
 }
