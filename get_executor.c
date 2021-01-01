@@ -17,6 +17,8 @@ exec_f get_executor(char *command)
 		return (&builtin_cd);
 	else if (_strcmp("help", command) == 0)
 		return (&builtin_help);
+	else if (_strcmp("env", command) == 0)
+		return (&builtin_env);
 	else if (_strcmp("setenv", command) == 0)
 		return (&builtin_setenv);
 	else if (_strcmp("history", command) == 0)
