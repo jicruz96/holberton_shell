@@ -13,7 +13,7 @@ void handle_redir(command_t *command, char **tokens, int *i)
 	{
 		if (tokens[*i][1] == '<') /* it's a heredoc */
 			command->logic |= IS_HEREDOC;
-		else 					/* it's an input redirect! */
+		else /* it's an input redirect! */
 			command->logic |= IS_REDIR_IN;
 		*i += 1;
 		command->input = tokens[*i];
@@ -21,9 +21,9 @@ void handle_redir(command_t *command, char **tokens, int *i)
 	else /* It's a '>' */
 	{
 		if (tokens[*i][1] == '>') /* It's an append redirect */
-            command->logic |= IS_APPEND;
-		else	/* it's an overwrite redirect */
-            command->logic |= IS_REDIR_OUT;
+			command->logic |= IS_APPEND;
+		else /* it's an overwrite redirect */
+			command->logic |= IS_REDIR_OUT;
 		*i += 1;
 		command->output = tokens[*i];
 	}
@@ -40,9 +40,9 @@ void handle_redir(command_t *command, char **tokens, int *i)
 void handle_pipe(command_t *command, char **tokens, int *i)
 {
 	if (tokens[*i][1] == '|') /* This is an OR */
-        command->logic |= IS_OR;
-    else
-        command->logic |= IS_PIPE;
+		command->logic |= IS_OR;
+	else
+		command->logic |= IS_PIPE;
 }
 /**
  * handle_and - function that handles logic
@@ -54,6 +54,6 @@ void handle_pipe(command_t *command, char **tokens, int *i)
  */
 void handle_and(command_t *command, char **tokens, int *i)
 {
-    if (tokens[*i][1] == '&' && tokens[*i][2] == '\0')
-        command->logic |= IS_AND;
+	if (tokens[*i][1] == '&' && tokens[*i][2] == '\0')
+		command->logic |= IS_AND;
 }
