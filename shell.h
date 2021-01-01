@@ -131,6 +131,7 @@ int clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
 
 char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);
+char *_realloc(char *p, int size);
 
 int handle_error(int code);
 int _strlen(char *str);

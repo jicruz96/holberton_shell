@@ -27,5 +27,7 @@ typedef struct reader_s
 
 char *_getline(const int fd);
 char *find_line(reader_t *rd);
+void _memset(char *s, int c, int n);
+char *_memcpy(char *dest, char *src, int n);
 
 #endif /* GETLINE_H */

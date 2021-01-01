@@ -71,8 +71,8 @@ char *find_line(reader_t *rd)
 				free(line);
 				return (NULL);
 			}
-			memcpy(tmp, line, bytes_copied);
-			memset(tmp + bytes_copied, '\0', line_size - bytes_copied);
+			_memcpy(tmp, line, bytes_copied);
+			_memset(tmp + bytes_copied, '\0', line_size - bytes_copied);
 			free(line), line = tmp;
 		}
 
@@ -80,7 +80,7 @@ char *find_line(reader_t *rd)
 			if (rd->buf[i] == '\n')
 			{
 				rd->bytes -= ++i;
-				memcpy(line + bytes_copied, rd->buf, i);
+				_memcpy(line + bytes_copied, rd->buf, i);
 				for (j = 0; i < READ_SIZE; j++, i++)
 					rd->buf[j] = rd->buf[i];
 				for (; j < READ_SIZE; j++)
@@ -88,7 +88,7 @@ char *find_line(reader_t *rd)
 				return (line);
 			}
 
-		memcpy(line + bytes_copied, rd->buf, rd->bytes);
+		_memcpy(line + bytes_copied, rd->buf, rd->bytes);
 		bytes_copied += rd->bytes;
 		rd->bytes = read(rd->fd, rd->buf, READ_SIZE);
 	}

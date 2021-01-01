@@ -8,18 +8,24 @@ void save_line_to_history(char *line)
 {
 	static int end_index = HISTSIZE - 1;
 	static int current_index;
-	static size_t history_size = HISTSIZE;
-	size_t i;
+	static int history_size = HISTSIZE;
+	int i;
+	char **tmp;
 
 	if (current_index == 0)
 		current_index = shell.history_size;
 
 	if (current_index > end_index)
 	{
-		shell.history = realloc(shell.history, history_size + HISTSIZE);
-		for (i = history_size; i < HISTSIZE + history_size; i++)
-			shell.history[i] = NULL;
 		history_size += HISTSIZE;
+		tmp = malloc(sizeof(char) * (history_size));
+		for (i = 0; i < history_size; i++)
+			if (i >= end_index)
+				tmp[i] = NULL;
+			else
+				tmp[i] = shell.history[i];
+		free(shell.history);
+		shell.history = tmp;
 		end_index = history_size - 2;
 	}
 	shell.history[current_index] = line;

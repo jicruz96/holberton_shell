@@ -15,7 +15,7 @@ char **get_tokens(int fd)
 	buf = _getline(fd);
 	if (buf == NULL)
 		return (NULL);
-	buf = realloc(buf, 1024);
+	buf = _realloc(buf, 1024);
 	line = buf;
 
 	/*  Create array for 256 tokens (strings) */
@@ -75,7 +75,7 @@ char *get_heredoc(char **line, int fd)
 		else /* else, make space and concat tmp onto token */
 		{
 			token_length += _strlen(tmp);
-			token = realloc(token, token_length + 1);
+			token = _realloc(token, token_length + 1);
 			_strcat(token, tmp);
 		}
 		free(tmp);
@@ -114,7 +114,7 @@ char *fix_dquote(char **line, char *token, int fd)
 		}
 
 		/* make space for extra stuff and concatenate */
-		token = realloc(token, token_length + 1);
+		token = _realloc(token, token_length + 1);
 		_strncat(token, *line, j);
 
 		/* point to end of line */
