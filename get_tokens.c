@@ -67,7 +67,7 @@ char *get_heredoc(char **line, int fd)
 		tmp = _getline(fd);
 
 		/* if next line is end tag, clean up and exit loop */
-		if (strncmp(tmp, end_tag, _strlen(tmp) - 1) == 0)
+		if (_strncmp(tmp, end_tag, _strlen(tmp) - 1) == 0)
 		{
 			searching_for_end_tag = false;
 			free(end_tag);
