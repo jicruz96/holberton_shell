@@ -30,7 +30,7 @@ def add_commands(commands):
         for command in commands:
             confirm = input(prompt.format(command))
             if confirm == '':
-                command_file.write('\n' + command)
+                command_file.write(command + '\n')
         command_file.close()
     return
 
@@ -67,6 +67,7 @@ else:
             command_file.close()
     except FileNotFoundError:
         print('test_commands.txt does not exist!')
+        exit(1)
 
 # Compile file using make file
 make_error = sp.Popen('make re', shell=True,
