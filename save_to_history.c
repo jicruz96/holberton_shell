@@ -37,14 +37,19 @@ void save_line_to_history(char *line)
  **/
 void save_history_to_file(void)
 {
-	int i;
+	int i, fd;
+	char *home = _getenv("HOME");
+	char history_path[256];
 
+	sprintf(history_path, "%s/%s", home, ".hsh_history");
+	fd = open(history_path, O_WRONLY | O_APPEND);
+	free(home);
 	for (i = 0; shell.history[i]; i++)
 	{
 		if (i >= shell.history_size)
-			write(shell.history_fd, shell.history[i], _strlen(shell.history[i]));
+			write(fd, shell.history[i], _strlen(shell.history[i]));
 		free(shell.history[i]);
 	}
 	free(shell.history);
-	close(shell.history_fd);
+	close(fd);
 }

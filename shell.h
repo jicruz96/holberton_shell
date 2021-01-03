@@ -21,6 +21,7 @@
 #define IS_AND 0020
 #define IS_OR 0040
 #define IS_PIPE 0100
+#define HAS_EXTRA 0200
 
 #define EXIT_ERROR 0777
 
@@ -40,7 +41,7 @@ typedef int (*exec_f)(char **);
  * @args:       array of arguments for command (first argument must be command)
  * @input:      input name as string
  * @output:     output name as string
- * @heredoc:	heredoc string (if it exists)
+ * @extra_fd:	extra file descriptor (if 'n>' redirection, extra_fd = n)
  * @executor:	function that executes command
  * @next:       pointer to next command struct
  * @prev:       pointer to previous command struct
@@ -53,7 +54,7 @@ typedef struct command_s
 	char **args;
 	char *input;
 	char *output;
-	char *heredoc;
+	int extra_fd;
 	exec_f executor;
 	struct command_s *next;
 	struct command_s *prev;
@@ -90,7 +91,7 @@ extern shell_t shell;
 void execute_hshrc(void);
 char *_getenv(char *key);
 char *get_prompt(int fd);
-int get_history(char *history[], int *history_size);
+int get_history(char *history[]);
 void execute_file(int fd);
 command_t *command_node_init(char *path);
 

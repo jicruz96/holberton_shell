@@ -56,7 +56,7 @@ void shell_init(char *shellname, int input)
 		shell.history = malloc(sizeof(char *) * HISTSIZE);
 		for (i = 0; i < HISTSIZE; i++)
 			shell.history[i] = NULL;
-		shell.history_fd = get_history(shell.history, &shell.history_size);
+		shell.history_size = get_history(shell.history);
 	}
 	shell.lines = 1;
 	shell.run = true;
