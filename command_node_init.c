@@ -15,7 +15,7 @@ command_t *command_node_init(char *command)
 	new->command = command;
 	new->path = get_program_path(command);
 	new->executor = get_executor(command);
-	new->heredoc = NULL;
+	new->extra_fd = 0;
 	new->input = NULL;
 	new->output = NULL;
 	new->args = malloc(sizeof(char *) * 256);

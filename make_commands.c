@@ -7,16 +7,14 @@
  */
 command_t *make_commands(char **tokens)
 {
-	command_t *head = NULL, *cmd = NULL, *prev = NULL;
+	command_t *head = NULL, *cmd = NULL, *prev = NULL, **connector;
 	int i, j, k;
 
 	for (i = 0; tokens[i]; prev = cmd, free(tokens[j]), i++)
 	{
 		cmd = command_node_init(tokens[i++]);
-		if (prev)
-			prev->next = cmd;
-		else
-			head = cmd;
+		connector = prev ? &prev->next : &head;
+		*connector = cmd;
 
 		for (j = i; tokens[j] && cmd->logic == 0;)
 			if (tokens[j][0] == '|')
@@ -39,10 +37,13 @@ command_t *make_commands(char **tokens)
 				cmd->logic |= (tokens[i][1] == '>') ? IS_APPEND : IS_REDIR_OUT;
 				free(tokens[i++]), cmd->output = tokens[i];
 			}
-			else
+			else if (IS_NUMERIC(tokens[i][0]) && tokens[i][1] == '>')
 			{
-				cmd->args[k++] = tokens[i];
+				cmd->logic |= HAS_EXTRA, cmd->extra_fd = tokens[i][0] + '0';
+				free(tokens[i++]), cmd->output = tokens[i];
 			}
+			else
+				cmd->args[k++] = tokens[i];
 	}
 	return (head);
 }
