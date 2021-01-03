@@ -132,7 +132,7 @@ char *fix_dquote(char **line, char *token, int fd)
  **/
 char *parse_line(char **line)
 {
-	char *token, *delims = " \t\n#><&|;\"";
+	char *token, *delim_tokens = "><&|;", *all_delims = " \t\n#><&|;\"";
 	int i = 0, j = 0;
 
 	if (!line || !(*line))
@@ -144,28 +144,31 @@ char *parse_line(char **line)
 	if (!(**line) || **line == '#' || **line == '\n')
 		return (NULL);
 
-	/* detect delimiters */
-	i += (**line == ';');
-	i += (**line == '>') * (1 + ((*line)[1] == '>'));
-	i += (**line == '<') * (1 + ((*line)[1] == '<'));
-	i += (**line == '&') * (1 + ((*line)[1] == '&'));
-	i += (**line == '|') * (1 + ((*line)[1] == '|'));
+	for (j = 0; delim_tokens[j]; j++) /* detect a delim token */
+		if (**line == delim_tokens[j])
+		{
+			if (**line == ';' || *(*line + 1) != delim_tokens[j])
+				i = 1;
+			else
+				i = 2;
+			break;
+		}
 
-	if (!i) /* if no delimiters detected, find end of token */
+	if (i == 0) /* if no delimiter tokens detected, find end of token */
 	{
-		if (**line == '"')
-			delims = "\"";
+		all_delims = (**line == '"') ? "\"" : all_delims;
 
 		for (i = 1; (*line)[i]; i++)
-			for (j = 0; delims[j]; j++)
-				if ((*line)[i] == delims[j])
+			for (j = 0; all_delims[j]; j++)
+				if ((*line)[i] == all_delims[j])
 					goto LOOP_EXIT;
 
-		/* adjust i value (for double quote edge case) */
-LOOP_EXIT:
-		i += (**line == '"' && (*line)[i] == '"');
+LOOP_EXIT:      /* adjust i value (for edge cases) */
+		if (**line == '"' && (*line)[i] == '"')
+			i += 1;
+		else if ((*line)[1] == '>' && IS_NUMERIC(**line))
+			i += 1;
 	}
-
 	token = _strndup(*line, i);
 	*line += i;
 	return (token);
