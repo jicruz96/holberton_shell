@@ -83,6 +83,7 @@ typedef struct shell_s
 	int history_fd;
 	int interactive;
 	int history_size;
+	pid_t pid;
 } shell_t;
 
 extern char **environ;
@@ -136,4 +137,7 @@ char *_realloc(char *p, int size);
 
 int handle_error(int code);
 int _strlen(char *str);
+char *replace_vars(char *token);
+char *int_to_str(int n);
+
 #endif /* SHELL_H */

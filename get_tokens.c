@@ -25,19 +25,12 @@ char **get_tokens(int fd)
 
 	/* Loop as long as parse_line keeps returning tokens */
 	for (i = 0; (token = parse_line(&line)); i++)
-	{
-		/* If a token has an unclosed doublequote, fix it! */
 		if (_strcmp(token, "<<") == 0)
-		{
-			tokens[i++] = token;
-			token = get_heredoc(&line, fd);
-		}
+			tokens[i++] = token, tokens[i] = get_heredoc(&line, fd);
 		else if (*token == '"')
-		{
-			token = fix_dquote(&line, token, fd);
-		}
-		tokens[i] = token;
-	}
+			tokens[i] = fix_dquote(&line, token, fd);
+		else
+			tokens[i] = token;
 
 	/* no more tokens? cool. save (or free) buf and return */
 	if (shell.interactive)
@@ -45,6 +38,34 @@ char **get_tokens(int fd)
 	else
 		free(buf);
 	return (tokens);
+}
+
+/**
+ * replace_vars - detects an replaces variables in a shell token
+ * @token: token
+ * Return: token with all variables replaces
+ **/
+char *replace_vars(char *token)
+{
+	char *new_token, *value;
+	int i;
+
+	for (i = 0; token[i] != '$'; i++)
+		if (token[i] == '\0')
+			return (token);
+
+	if (_strcmp(token + i + 1, "$") == 0)
+		value = int_to_str(shell.pid);
+	else if (_strcmp(token + i + 1, "?") == 0)
+		value = int_to_str(shell.status);
+	else
+		value = _getenv(token + i + 1);
+
+	new_token = _realloc(NULL, i + _strlen(value) + 1);
+	sprintf(new_token, "%.*s%s", i, token, value);
+	free(token);
+	free(value);
+	return (replace_vars(new_token));
 }
 
 /**

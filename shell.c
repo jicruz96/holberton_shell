@@ -1,6 +1,6 @@
 #include "shell.h"
 
-shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
+shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0};
 
 /**
  * main - entry point to shell
@@ -51,6 +51,7 @@ void shell_init(char *shellname, int input)
 	shell.prompt = get_prompt(input);
 	shell.interactive = isatty(input);
 	shell.status = 0;
+	shell.pid = getpid();
 	if (shell.interactive)
 	{
 		shell.history = malloc(sizeof(char *) * HISTSIZE);
