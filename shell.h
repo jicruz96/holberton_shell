@@ -20,8 +20,11 @@
 #define IS_HEREDOC 0010
 #define IS_AND 0020
 #define IS_OR 0040
-#define IS_PIPE 0100
+#define IS_PIPE 0100	
 #define HAS_EXTRA 0200
+#define BUILTIN_CD 0377
+#define CD_FAIL 01000
+#define NO_OLD_PWD 02000
 
 #define EXIT_ERROR 0777
 
@@ -95,8 +98,9 @@ int get_history(char *history[]);
 void execute_file(int fd);
 command_t *command_node_init(char *path);
 
-int fork_and_exec(command_t *command);
-
+void fork_and_exec(command_t *cmd);
+int execute_commands(command_t *command);
+char **_realloc_string_array(char **array, int is_malloced);
 int builtin_cd(char **args);
 int builtin_setenv(char **args);
 int builtin_alias(char **args);
