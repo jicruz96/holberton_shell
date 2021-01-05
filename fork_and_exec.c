@@ -63,13 +63,13 @@ void fork_and_exec(command_t *cmd)
 		else
 			shell.status = execve(cmd->path, cmd->args, environ);
 		if (shell.status)
-			exit(handle_error(errno));
+			exit(handle_error(errno, cmd->command, NULL));
 		exit(shell.status);
 	}
 
 	/* Parent waits (or detects forking error) */
 	if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
-		shell.status = handle_error(errno);
+		shell.status = handle_error(errno, cmd->command, NULL);
 	else
 		shell.status = WEXITSTATUS(status);
 }
@@ -143,10 +143,5 @@ int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 		return (false);
 	if (!shell.status && (cmd->logic & IS_OR))
 		return (false);
-	if (_strcmp(cmd->command, "exit") == 0)
-	{
-		shell.run = false;
-		return (false);
-	}
 	return (true);
 }

@@ -22,13 +22,15 @@
 #define IS_OR 0040
 #define IS_PIPE 0100
 #define HAS_EXTRA 0200
-#define BUILTIN_CD 0377
-#define CD_FAIL 01000
-#define NO_OLD_PWD 02000
 
-#define EXIT_ERROR 0777
+#define CD_FAIL 100
+#define UNSETENV_FAIL 101
+#define SETENV_FAIL 102
+#define SETENV2 103
+#define EXIT_ERROR 104
 
 #define IS_NUMERIC(x) ((x) >= '0' && (x) <= '9')
+#define IS_ALPHA(x) (((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z'))
 
 #define true 1
 #define false 0
@@ -89,12 +91,12 @@ typedef struct shell_s
 	pid_t pid;
 } shell_t;
 
-/** struct codes_s - associates an error code with an error message
+/**
+ * struct codes_s - associates an error code with an error message
  * @code: error code
- * @shell_code: 
+ * @shell_code: error code to display in shell
  * @msg: message
- */
-
+ **/
 typedef struct codes_s
 {
 	int code;
@@ -152,7 +154,7 @@ char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);
 char *_realloc(char *p, int size);
 
-int handle_error(int code);
+int handle_error(int code, char *program, char *supplement);
 int _strlen(char *str);
 char *replace_vars(char *token);
 char *int_to_str(int n);
