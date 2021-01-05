@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 {
 	int fd = STDIN_FILENO;
 	char *error_msg = NULL;
+	int i;
 
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
@@ -35,6 +36,9 @@ int main(int argc, char *argv[])
 	_getline(-1);
 	if (shell.interactive)
 		save_history_to_file();
+	for (i = 0; environ[i]; i++)
+		free(environ[i]);
+	free(environ);
 	return (shell.status);
 }
 
@@ -61,4 +65,5 @@ void shell_init(char *shellname, int input)
 	}
 	shell.lines = 1;
 	shell.run = true;
+	environ = _realloc_string_array(environ, 0);
 }

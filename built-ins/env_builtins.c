@@ -23,10 +23,38 @@ int builtin_env(char **args)
  **/
 int builtin_setenv(char **args)
 {
-	int status = 0;
+	int i;
+	char *ENV_VAR = malloc(sizeof(char) * 256);
+	char *VARIABLE, *VALUE, *var = NULL;
 
-	(void)args;
-	return (status);
+	/* if only "setenv" passed in, call env */
+	if (args[1] == NULL)
+		return (builtin_env(args));
+
+	/* retrieve our env variable and new corresponding value */
+	VARIABLE = args[1];
+	VALUE = (args[2]) ? args[2] : "";
+
+	/* construct env var */
+	sprintf(ENV_VAR, "%s=%s", VARIABLE, VALUE);
+
+	/* loop through enviornment variables */
+	for (i = 0; environ[i]; i++)
+	{
+		var = _strdup(environ[i]);
+		/* if the var we're on is the one we want to update */
+		if (_strcmp(strtok(var, "="), VARIABLE) == 0)
+		{
+			free(var);
+			break;
+		}
+		free(var);
+	}
+
+	/* set environ [i] to our new env var if it's NULL */
+	environ = _realloc_string_array(environ, 1);
+	environ[i] = ENV_VAR;
+	return (EXIT_SUCCESS);
 }
 
 /**
@@ -36,8 +64,29 @@ int builtin_setenv(char **args)
  **/
 int builtin_unsetenv(char **args)
 {
-	int status = 0;
+	int i;
+	char *UNSET_VARIABLE, *var;
+	
+	if (args[1] == NULL)
+		return (handle_error(UNSETENV_FAIL));
+	/* retrieve our env vaw corresponding value */
+	UNSET_VARIABLE = args[1];
 
-	(void)args;
-	return (status);
+	/* loop through enviornment variables */
+	for (i = 0; environ[i]; i++)
+	{
+		var = _strdup(environ[i]);
+		/* if the var we're on is the one we want to delete */
+		if (_strcmp(strtok(var, "="), UNSET_VARIABLE) == 0)
+		{
+			/* delete it */
+			free(var);
+			free(environ[i]);
+			environ[i] = NULL;
+			return (EXIT_SUCCESS);
+		}
+		free(var);
+		/* if we didn't return */
+	}
+	return (EXIT_SUCCESS);
 }

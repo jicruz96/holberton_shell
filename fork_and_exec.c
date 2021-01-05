@@ -1,42 +1,38 @@
 #include "shell.h"
 
 /**
- * fork_and_exec - wrapper for pipes vs non pipes
+ * execute_commands - wrapper for pipes vs non pipes
  * @command: command node
  * Return: status
  */
-int fork_and_exec(command_t *command)
+int execute_commands(command_t *command)
 {
-	pid_t child_pid;
 	int stdin_cpy = dup(STDIN_FILENO), stdout_cpy = dup(STDOUT_FILENO);
-	int input_fd = STDIN_FILENO, output_fd, pipefds[2], status = 0;
+	int input_fd = STDIN_FILENO, output_fd, pipefds[2];
 	command_t *tmp;
 
 	for (tmp = command; tmp && shell.run; tmp = tmp->next)
 	{
+		/* Get input and output */
 		if (input_fd == STDIN_FILENO)
 			input_fd = get_input_fd(tmp);
 		output_fd = get_output_fd(tmp);
+
+		/* If pipe, create pipe, set output to pipe writer */
 		if (tmp->logic & IS_PIPE)
 			pipe(pipefds), output_fd = pipefds[1];
+
+		/* Redirect stdin and stdout to the input and output */
 		dup2(input_fd, STDIN_FILENO), dup2(output_fd, STDOUT_FILENO);
-		child_pid = fork();
-		if (child_pid == 0) /* child executes */
-		{
-			if (tmp->executor)
-				shell.status = tmp->executor(tmp->args);
-			else
-				shell.status = execve(tmp->path, tmp->args, environ);
-			if (shell.run && shell.status)
-				exit(handle_error(errno));
-			exit(shell.status);
-		}
-		/* Parent waits (or detects forking error) */
-		if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
-			shell.status = handle_error(errno);
+		if (tmp->executor)
+			shell.status = tmp->executor(tmp->args);
 		else
-			shell.status = WEXITSTATUS(status);
+			fork_and_exec(tmp);
+
+		/* Redirect input and output to stdin and stdout */
 		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
+
+		/* Clean pipes and GTFO if needed */
 		if (clean_pipes(tmp, &input_fd, &output_fd) == false)
 		{
 			if (tmp->logic & IS_PIPE)
@@ -46,7 +42,36 @@ int fork_and_exec(command_t *command)
 		if (tmp->logic & IS_PIPE)
 			input_fd = pipefds[0];
 	}
+
 	return (shell.status);
+}
+
+/**
+ * fork_and_exec - forks and executes
+ * @cmd: command node
+ **/
+void fork_and_exec(command_t *cmd)
+{
+	pid_t child_pid;
+	int status = 0;
+
+	child_pid = fork();
+	if (child_pid == 0) /* child executes */
+	{
+		if (cmd->executor)
+			shell.status = cmd->executor(cmd->args);
+		else
+			shell.status = execve(cmd->path, cmd->args, environ);
+		if (shell.status)
+			exit(handle_error(errno));
+		exit(shell.status);
+	}
+
+	/* Parent waits (or detects forking error) */
+	if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
+		shell.status = handle_error(errno);
+	else
+		shell.status = WEXITSTATUS(status);
 }
 
 /**
@@ -124,18 +149,4 @@ int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 		return (false);
 	}
 	return (true);
-}
-
-/**
- * handle_error - prints error messages
- * @code: error code
- * Return: error code
- **/
-int handle_error(int code)
-{
-	char error_msg[256];
-
-	sprintf(error_msg, "%s: %d", shell.name, shell.lines);
-	perror(error_msg);
-	return (code);
 }

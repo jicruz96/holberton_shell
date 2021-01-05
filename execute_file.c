@@ -19,7 +19,7 @@ void execute_file(int fd)
 		if (tokens == NULL)
 			break;
 		commands = make_commands(tokens);
-		fork_and_exec(commands);
+		execute_commands(commands);
 		shell.lines++;
 		free_command_chain(commands);
 		free(tokens);
