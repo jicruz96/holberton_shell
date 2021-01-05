@@ -50,22 +50,24 @@ char *replace_vars(char *token)
 	char *new_token, *value;
 	int i;
 
+	/* check for a '$' . If no dollar signs, return token */
 	for (i = 0; token[i] != '$'; i++)
 		if (token[i] == '\0')
 			return (token);
 
-	if (_strcmp(token + i + 1, "$") == 0)
+	if (_strcmp(token + i, "$$") == 0)	/* If '$$' get pid */
 		value = int_to_str(shell.pid);
-	else if (_strcmp(token + i + 1, "?") == 0)
+	else if (_strcmp(token + i, "$?") == 0)	/* If 'S?' get prev exit status */
 		value = int_to_str(shell.status);
-	else
+	else	/* else, get variable value from environment */
 		value = _getenv(token + i + 1);
 
+	/* Create token */
 	new_token = _realloc(NULL, i + _strlen(value) + 1);
-	sprintf(new_token, "%.*s%s", i, token, value);
-	free(token);
-	free(value);
-	return (replace_vars(new_token));
+	sprintf(new_token, "%.*s%s", i, token, value);	/* dope-ass printf logic */
+	free(token);	/* free old token */
+	free(value);	/* free value buffer */
+	return (replace_vars(new_token));	/* check for more variables */
 }
 
 /**
