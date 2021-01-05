@@ -17,7 +17,7 @@ int builtin_exit(char **args)
 		/* If exit code is invalid, print error */
 		for (i = is_negative; args[1][i]; i++)
 			if (!IS_NUMERIC(args[1][i]))
-				return (handle_error(EXIT_ERROR));
+				return (handle_error(EXIT_ERROR, "exit", _strdup(args[1])));
 
 		/* Else, calculate exit code */
 		for (i = is_negative; args[1][i]; i++)
@@ -26,9 +26,14 @@ int builtin_exit(char **args)
 		if (is_negative)
 			status *= -1;
 	}
+	else
+	{
+		status = shell.status;
+	}
 
 	/* set shell.run = false */
 	shell.run = false;
+
 	/* Return exit code */
 	return (status);
 }
