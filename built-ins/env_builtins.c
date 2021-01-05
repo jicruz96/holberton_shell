@@ -66,12 +66,10 @@ int builtin_unsetenv(char **args)
 {
 	int i;
 	char *UNSET_VARIABLE, *var;
-
+	
 	if (args[1] == NULL)
-		/* handle_error(EXIT_FAILURE); */
-		return (EXIT_FAILURE);
-
-	/* retrieve our env variable and new corresponding value */
+		return (handle_error(UNSETENV_FAIL));
+	/* retrieve our env vaw corresponding value */
 	UNSET_VARIABLE = args[1];
 
 	/* loop through enviornment variables */
@@ -90,5 +88,5 @@ int builtin_unsetenv(char **args)
 		free(var);
 		/* if we didn't return */
 	}
-	return (EXIT_FAILURE);
+	return (EXIT_SUCCESS);
 }

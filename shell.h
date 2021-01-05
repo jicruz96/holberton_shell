@@ -20,7 +20,7 @@
 #define IS_HEREDOC 0010
 #define IS_AND 0020
 #define IS_OR 0040
-#define IS_PIPE 0100	
+#define IS_PIPE 0100
 #define HAS_EXTRA 0200
 #define BUILTIN_CD 0377
 #define CD_FAIL 01000
@@ -87,6 +87,17 @@ typedef struct shell_s
 	int interactive;
 	int history_size;
 } shell_t;
+
+/** struct codes_s - associates an error code with an error message
+ * @code: code
+ * @msg: message
+ */
+
+typedef struct codes_s
+{
+	int code;
+	char *msg;
+} code_t;
 
 extern char **environ;
 extern shell_t shell;

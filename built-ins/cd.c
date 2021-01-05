@@ -28,7 +28,8 @@ int builtin_cd(char **args)
 		if (!prev_dir || !(*prev_dir))
 		{
 			free(prev_dir);
-			return (handle_error(NO_OLD_PWD));
+			prev_dir = _getenv("HOME");
+			printf("%s\n", prev_dir);
 		}
 		if (chdir(prev_dir) == -1)
 		{
