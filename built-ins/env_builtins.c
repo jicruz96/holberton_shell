@@ -24,7 +24,7 @@ int builtin_env(char **args)
 int builtin_setenv(char **args)
 {
 	int i;
-	char *ENV_VAR = malloc(sizeof(char) * 256);
+	char *ENV_VAR;
 	char *VARIABLE, *VALUE, *var = NULL;
 
 	/* if only "setenv" passed in, call env */
@@ -35,22 +35,30 @@ int builtin_setenv(char **args)
 	VARIABLE = args[1];
 	VALUE = (args[2]) ? args[2] : "";
 
+	/* Verify value */
+	if (!IS_ALPHA(*VARIABLE))
+		return (handle_error(SETENV2, "setenv", NULL));
+
+	for (i = 1; VARIABLE[i]; i++)
+		if (!IS_ALPHA(VARIABLE[i]) && !IS_NUMERIC(VARIABLE[i]))
+			return (handle_error(SETENV_FAIL, "setenv", NULL));
+
 	/* construct env var */
+	ENV_VAR = malloc(sizeof(char) * 256);
 	sprintf(ENV_VAR, "%s=%s", VARIABLE, VALUE);
 
 	/* loop through enviornment variables */
 	for (i = 0; environ[i]; i++)
 	{
 		var = _strdup(environ[i]);
-		/* if the var we're on is the one we want to update */
 		if (_strcmp(strtok(var, "="), VARIABLE) == 0)
 		{
-			free(var);
-			break;
+			free(var), free(environ[i]);
+			environ[i] = ENV_VAR;
+			return (EXIT_SUCCESS);
 		}
 		free(var);
 	}
-
 	/* set environ [i] to our new env var if it's NULL */
 	environ = _realloc_string_array(environ, 1);
 	environ[i] = ENV_VAR;
@@ -66,9 +74,9 @@ int builtin_unsetenv(char **args)
 {
 	int i;
 	char *UNSET_VARIABLE, *var;
-	
+
 	if (args[1] == NULL)
-		return (handle_error(UNSETENV_FAIL));
+		return (handle_error(UNSETENV_FAIL, "unsetenv", NULL));
 	/* retrieve our env vaw corresponding value */
 	UNSET_VARIABLE = args[1];
 
