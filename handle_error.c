@@ -3,19 +3,22 @@
 /**
  * handle_error - prints error messages
  * @code: error code
+ * @supplement: supplement text
  * Return: error code
  **/
-int handle_error(int code)
+int handle_error(int code, char *program, char *supplement)
 {
 	char error_msg[256];
-    code_t[] = {{ENOENT, 127, "not found"},
+    code_t[] = {{ENOENT, 127, "not found"}, {EPERM, 1, "Permission denied"},\
+                {CD_FAIL, 2, "can't cd to "}, {EXIT_ERROR, , "Illegal number: "},\
+                {NO_OLD_PWD, , "No OLDPWD set"}
     }
 
-	sprintf(error_msg, "%s: %d", shell.name, shell.lines);
-    if (code == EINVAL)
+	sprintf(error_msg, "%s: %d: %s", shell.name, shell.lines, program);
+
+    if (code == ENOENT)
     {
         dprintf(STDERR_FILENO, "%s: not found\n", error_msg);
-        
     }
     else if (code == CD_FAIL)
     {
@@ -25,7 +28,7 @@ int handle_error(int code)
     {
         dprintf(STDERR_FILENO, "%s: something\n", error_msg);
     }
-    else if (code == EBADPERMS)
+    else if (code == EPERM)
     {
         dprintf(STDERR_FILENO, "%s: something\n", error_msg);
         

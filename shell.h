@@ -89,13 +89,15 @@ typedef struct shell_s
 } shell_t;
 
 /** struct codes_s - associates an error code with an error message
- * @code: code
+ * @code: error code
+ * @shell_code: 
  * @msg: message
  */
 
 typedef struct codes_s
 {
 	int code;
+	int shell_code;
 	char *msg;
 } code_t;
 
