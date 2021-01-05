@@ -11,6 +11,7 @@ command_t *command_node_init(char *command)
 
 	if (!new)
 		return (NULL);
+
 	new->logic = DEFAULT_LOGIC;
 	new->command = command;
 	new->path = get_program_path(command);

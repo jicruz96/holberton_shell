@@ -1,4 +1,4 @@
-#include "../shell.h"
+#include "shell.h"
 /**
  * handle_redir - function that handles logic
  * if passed in token is a riderect '>' '<'
