@@ -1,5 +1,5 @@
 #include "../shell.h"
-#define setenv(x) builtin_setenv(x)
+
 /**
  * builtin_cd - custom cd (i.e. "change directory") built-in
  * @args: arguments (string array)
@@ -7,44 +7,39 @@
  **/
 int builtin_cd(char **args)
 {
-	char *home, *prev_dir, *c = malloc(sizeof(char) * 256);
-	char *prg = malloc(10), *z[] = {NULL, NULL, NULL}, *a = "PWD";
+	char cwd[256], *OLDPWD[] = {0, "OLDPWD", 0}, *new[] = {0, "PWD", 0};
+	int print_dir = 0;
 
-	z[1] = prg;
-	if (args[1] == NULL)
-	{
-		home = _getenv("HOME"), _strcpy(z[1], "OLDPWD"), z[2] = getcwd(c, 256);
-		if (chdir(home) == -1)
-		{
-			free(c), free(home), free(prg);
-			return (handle_error(CD_FAIL, "cd", home));
-		}
-		setenv(z), _strcpy(z[1], "PWD"), z[2] = home, setenv(z);
-		free(home), free(c), free(prg);
-		return (EXIT_SUCCESS);
-	}
-	if (args[1][0] == '-')
-	{
-		prev_dir = _getenv("OLDPWD");
-		if (!prev_dir || !(*prev_dir))
-			free(prev_dir), prev_dir = _getenv("HOME");
-		_strcpy(z[1], "OLDPWD"), z[2] = getcwd(c, 256);
-		if (chdir(prev_dir) == -1)
-		{
-			free(c), free(prev_dir), free(prg);
-			return (handle_error(CD_FAIL, "cd", prev_dir));
-		}
-		printf("%s\n", prev_dir);
-		setenv(z), _strcpy(z[1], "PWD"), z[2] = prev_dir, setenv(z);
-		free(prev_dir), free(c), free(prg);
-		return (EXIT_SUCCESS);
-	}
-	_strcpy(z[1], "OLDPWD"), z[2] = getcwd(c, 256);
-	if (chdir(args[1]) == -1)
-	{
-		free(c), free(prg);
-		return (handle_error(CD_FAIL, "cd", _strdup(args[1])));
-	}
-	setenv(z), _strcpy(z[1], a), z[2] = args[1], setenv(z), free(c), free(prg);
+	/* set OLDPWD to current working directory */
+	OLDPWD[2] = getcwd(cwd, 256);
+
+	/* set new directory target */
+	if (_strcmp(args[1], "-") == 0)
+		new[2] = _getenv("OLDPWD"), print_dir = true;
+	else
+		new[2] = _strdup(args[1]);
+
+	/* if no dir found/provided, change to home dir */
+	if (!new[2] || !new[2][0])
+		free(new[2]), new[2] = _getenv("HOME");
+	
+	/* if no home dir found, just stay in cwd! */
+	if (!new[2] || !new[2][0])
+		free(new[2]), new[2] = OLDPWD[2];
+
+	/* change directory */
+	if (chdir(new[2]) == -1)
+		return (handle_error(CD_FAIL, "cd", new[2]));
+
+	if (print_dir)
+		printf("%s\n", new[2]);
+
+	/* update environment */
+	builtin_setenv(OLDPWD), builtin_setenv(new);	
+	
+	/* free new[2] if it points to malloc'd memory */
+	if (new[2] != OLDPWD[2])
+		free(new[2]);
+		
 	return (EXIT_SUCCESS);
 }
