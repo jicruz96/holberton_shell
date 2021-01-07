@@ -1,0 +1,7 @@
+failing case when input is an executable file in cwd that shouldn't execute
+failing empty lines with thousands of spaces
+setenv VAR does not set the var and does not return error
+setenv alone does not do anything and does not return error
+setenv and unsetenv always return 0
+check what happens when $HOME or $OLDPWD don't exist and you try to do cd;
+if you are still missing a check in cd, it could be that they want a different behavior when the directory does not exist. double check shell v1

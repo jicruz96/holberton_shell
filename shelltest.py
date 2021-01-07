@@ -15,7 +15,7 @@ output = """
         HSH:
         $   {}
         $   exit status: {}
-        $   error msg: [{}]
+        $   error msg: {}
     """
 
 
@@ -82,13 +82,13 @@ HOME = getcwd()
 # Check each command
 results = ''
 for command in commands:
-    command = command[:-1]
+    if command[-1] == '\n':
+        command = command[:-1]
     if command == '':
         continue
     hsh_out, hsh_err, hsh_code = shelltest(command, './hsh')
     sh_out, sh_err, sh_code = shelltest(command, '/bin/sh')
-
-    # hsh_err = hsh_err.replace('./hsh', '/bin/sh')
+    hsh_err = hsh_err.replace('./hsh', '/bin/sh')
     chdir(HOME)
 
     if sh_out != hsh_out or sh_err != hsh_err or sh_code != hsh_code:
