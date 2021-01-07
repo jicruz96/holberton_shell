@@ -55,19 +55,19 @@ char *replace_vars(char *token)
 		if (token[i] == '\0')
 			return (token);
 
-	if (_strcmp(token + i, "$$") == 0)	/* If '$$' get pid */
+	if (_strcmp(token + i, "$$") == 0) /* If '$$' get pid */
 		value = int_to_str(shell.pid);
-	else if (_strcmp(token + i, "$?") == 0)	/* If 'S?' get prev exit status */
+	else if (_strcmp(token + i, "$?") == 0) /* If 'S?' get prev exit status */
 		value = int_to_str(shell.status);
-	else	/* else, get variable value from environment */
+	else /* else, get variable value from environment */
 		value = _getenv(token + i + 1);
 
 	/* Create token */
 	new_token = _realloc(NULL, i + _strlen(value) + 1);
-	sprintf(new_token, "%.*s%s", i, token, value);	/* dope-ass printf logic */
-	free(token);	/* free old token */
-	free(value);	/* free value buffer */
-	return (replace_vars(new_token));	/* check for more variables */
+	sprintf(new_token, "%.*s%s", i, token, value); /* dope-ass printf logic */
+	free(token);								   /* free old token */
+	free(value);								   /* free value buffer */
+	return (replace_vars(new_token));			   /* check for more variables */
 }
 
 /**
@@ -155,7 +155,7 @@ char *fix_dquote(char **line, char *token, int fd)
  **/
 char *parse_line(char **line)
 {
-	char *token, *delim_tokens = "><&|;", *all_delims = " \t\n#><&|;\"";
+	char *token, *delim_tokens = "><&|;", *all_delims = " \t\n><&|;\"";
 	int i = 0, j = 0;
 
 	if (!line || !(*line))
@@ -186,7 +186,7 @@ char *parse_line(char **line)
 				if ((*line)[i] == all_delims[j])
 					goto LOOP_EXIT;
 
-LOOP_EXIT:      /* adjust i value (for edge cases) */
+LOOP_EXIT: /* adjust i value (for edge cases) */
 		if (**line == '"' && (*line)[i] == '"')
 			i += 1;
 		else if ((*line)[1] == '>' && IS_NUMERIC(**line))
