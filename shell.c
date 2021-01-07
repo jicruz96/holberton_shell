@@ -10,7 +10,7 @@ shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0};
  **/
 int main(int argc, char *argv[])
 {
-	int fd, i;
+	int fd = STDIN_FILENO, i;
 
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		shell_init(argv[0], STDIN_FILENO);
+		shell_init(argv[0], fd);
 	}
 
 	if (shell.interactive)
