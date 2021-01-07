@@ -72,29 +72,33 @@ int builtin_setenv(char **args)
  **/
 int builtin_unsetenv(char **args)
 {
-	int i;
+	int i, j;
 	char *UNSET_VARIABLE, *var;
 
+	/* if no arguments were given, print error */
 	if (args[1] == NULL)
 		return (handle_error(UNSETENV_FAIL, "unsetenv", NULL));
-	/* retrieve our env vaw corresponding value */
+
 	UNSET_VARIABLE = args[1];
 
-	/* loop through enviornment variables */
 	for (i = 0; environ[i]; i++)
 	{
 		var = _strdup(environ[i]);
-		/* if the var we're on is the one we want to delete */
+
+		/* if the environment variable matches the target... */
 		if (_strcmp(strtok(var, "="), UNSET_VARIABLE) == 0)
 		{
-			/* delete it */
 			free(var);
 			free(environ[i]);
+			/* adjust the environment array */
+			for (j = i + 1; environ[j]; i++, j++)
+				environ[i] = environ[j];
+
+			/* null-terminate the environment array */
 			environ[i] = NULL;
 			return (EXIT_SUCCESS);
 		}
 		free(var);
-		/* if we didn't return */
 	}
 	return (EXIT_SUCCESS);
 }

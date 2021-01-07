@@ -1,6 +1,7 @@
 #ifndef SHELL_H
 #define SHELL_H
 
+#include <time.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -37,6 +38,17 @@
 #define PS2 "> "
 
 typedef int (*exec_f)(char **);
+
+/**
+ * struct format_match_s - matches a function to a format specifier
+ * @specifier: format specifier associated with formatter
+ * @formatter: function that returns a formatted string
+ **/
+typedef struct format_match_s
+{
+	char specifier;
+	char *(*formatter)(void);
+} format_match_t;
 
 /**
  * struct command_s - command struct
@@ -76,6 +88,7 @@ typedef struct command_s
  * @history_fd: history file descriptor
  * @interactive: if shell is in interactive mode
  * @history_size: size of history
+ * @pid: shell process id
  **/
 typedef struct shell_s
 {
@@ -88,6 +101,7 @@ typedef struct shell_s
 	int history_fd;
 	int interactive;
 	int history_size;
+	pid_t pid;
 } shell_t;
 
 /**
@@ -155,4 +169,14 @@ char *_realloc(char *p, int size);
 
 int handle_error(int code, char *program, char *supplement);
 int _strlen(char *str);
+char *replace_vars(char *token);
+char *int_to_str(int n);
+
+char *get_date_prompt(void);
+char *get_hostname_prompt(void);
+char *get_username_prompt(void);
+char *get_shellname_prompt(void);
+char *get_cwd_prompt(void);
+
+
 #endif /* SHELL_H */

@@ -1,6 +1,6 @@
 #include "shell.h"
 
-shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
+shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0};
 
 /**
  * main - entry point to shell
@@ -11,7 +11,6 @@ shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0};
 int main(int argc, char *argv[])
 {
 	int fd = STDIN_FILENO;
-	char *error_msg = NULL;
 	int i;
 
 	/* If an argument was passed, execute that and exit */
@@ -20,8 +19,7 @@ int main(int argc, char *argv[])
 		fd = open(argv[1], O_RDONLY);
 		if (fd == -1)
 		{
-			sprintf(error_msg, "%s: %s", argv[0], argv[1]);
-			perror(error_msg);
+			dprintf(STDERR_FILENO, "%s: 0: Can't open %s\n", argv[0], argv[1]);
 			return (errno);
 		}
 	}
@@ -52,9 +50,9 @@ void shell_init(char *shellname, int input)
 	int i;
 
 	shell.name = shellname;
-	shell.prompt = get_prompt(input);
 	shell.interactive = isatty(input);
 	shell.status = 0;
+	shell.pid = getpid();
 	if (shell.interactive)
 	{
 		shell.history = malloc(sizeof(char *) * HISTSIZE);

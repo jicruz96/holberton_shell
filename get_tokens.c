@@ -25,19 +25,12 @@ char **get_tokens(int fd)
 
 	/* Loop as long as parse_line keeps returning tokens */
 	for (i = 0; (token = parse_line(&line)); i++)
-	{
-		/* If a token has an unclosed doublequote, fix it! */
 		if (_strcmp(token, "<<") == 0)
-		{
-			tokens[i++] = token;
-			token = get_heredoc(&line, fd);
-		}
+			tokens[i++] = token, tokens[i] = get_heredoc(&line, fd);
 		else if (*token == '"')
-		{
-			token = fix_dquote(&line, token, fd);
-		}
-		tokens[i] = token;
-	}
+			tokens[i] = fix_dquote(&line, token, fd);
+		else
+			tokens[i] = token;
 
 	/* no more tokens? cool. save (or free) buf and return */
 	if (shell.interactive)
@@ -45,6 +38,36 @@ char **get_tokens(int fd)
 	else
 		free(buf);
 	return (tokens);
+}
+
+/**
+ * replace_vars - detects an replaces variables in a shell token
+ * @token: token
+ * Return: token with all variables replaces
+ **/
+char *replace_vars(char *token)
+{
+	char *new_token, *value;
+	int i;
+
+	/* check for a '$' . If no dollar signs, return token */
+	for (i = 0; token[i] != '$'; i++)
+		if (token[i] == '\0')
+			return (token);
+
+	if (_strcmp(token + i, "$$") == 0) /* If '$$' get pid */
+		value = int_to_str(shell.pid);
+	else if (_strcmp(token + i, "$?") == 0) /* If 'S?' get prev exit status */
+		value = int_to_str(shell.status);
+	else /* else, get variable value from environment */
+		value = _getenv(token + i + 1);
+
+	/* Create token */
+	new_token = _realloc(NULL, i + _strlen(value) + 1);
+	sprintf(new_token, "%.*s%s", i, token, value); /* dope-ass printf logic */
+	free(token);								   /* free old token */
+	free(value);								   /* free value buffer */
+	return (replace_vars(new_token));			   /* check for more variables */
 }
 
 /**
@@ -132,7 +155,7 @@ char *fix_dquote(char **line, char *token, int fd)
  **/
 char *parse_line(char **line)
 {
-	char *token, *delim_tokens = "><&|;", *all_delims = " \t\n#><&|;\"";
+	char *token, *delim_tokens = "><&|;", *all_delims = " \t\n><&|;\"";
 	int i = 0, j = 0;
 
 	if (!line || !(*line))
@@ -163,7 +186,7 @@ char *parse_line(char **line)
 				if ((*line)[i] == all_delims[j])
 					goto LOOP_EXIT;
 
-LOOP_EXIT:      /* adjust i value (for edge cases) */
+LOOP_EXIT: /* adjust i value (for edge cases) */
 		if (**line == '"' && (*line)[i] == '"')
 			i += 1;
 		else if ((*line)[1] == '>' && IS_NUMERIC(**line))
