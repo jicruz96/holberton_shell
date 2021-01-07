@@ -22,7 +22,7 @@ int builtin_cd(char **args)
 	/* if no dir found/provided, change to home dir */
 	if (!new[2] || !new[2][0])
 		free(new[2]), new[2] = _getenv("HOME");
-	
+
 	/* if no home dir found, just stay in cwd! */
 	if (!new[2] || !new[2][0])
 		free(new[2]), new[2] = OLDPWD[2];
@@ -35,11 +35,11 @@ int builtin_cd(char **args)
 		printf("%s\n", new[2]);
 
 	/* update environment */
-	builtin_setenv(OLDPWD), builtin_setenv(new);	
-	
+	builtin_setenv(OLDPWD), builtin_setenv(new);
+
 	/* free new[2] if it points to malloc'd memory */
 	if (new[2] != OLDPWD[2])
 		free(new[2]);
-		
+
 	return (EXIT_SUCCESS);
 }
