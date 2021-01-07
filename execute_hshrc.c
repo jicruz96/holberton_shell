@@ -6,7 +6,7 @@
 void execute_hshrc(void)
 {
 	int hshrc_fd;
-	char *homedir, path[256];
+	char *homedir, path[256], bah[256];
 
 	/* create path for hshrc */
 	homedir = _getenv("HOME");
@@ -15,8 +15,11 @@ void execute_hshrc(void)
 
 	/* go get .hshrc file descriptor */
 	hshrc_fd = open(path, O_RDONLY);
-	if (hshrc_fd == -1)
-		return;
+	if (hshrc_fd == -1 && errno != ENOENT)
+	{
+		sprintf(bah, "%s: %s", shell.name, path);
+		perror(bah);
+	}
 
 	execute_file(hshrc_fd);
 }

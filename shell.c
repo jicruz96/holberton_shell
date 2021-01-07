@@ -10,8 +10,7 @@ shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0};
  **/
 int main(int argc, char *argv[])
 {
-	int fd = STDIN_FILENO;
-	int i;
+	int fd, i;
 
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
@@ -22,10 +21,12 @@ int main(int argc, char *argv[])
 			dprintf(STDERR_FILENO, "%s: 0: Can't open %s\n", argv[0], argv[1]);
 			return (errno);
 		}
+		shell_init(argv[1], fd);
 	}
-
-	/* fd is either STDIN or the argument file descriptor */
-	shell_init(argv[0], fd);
+	else
+	{
+		shell_init(argv[0], STDIN_FILENO);
+	}
 
 	if (shell.interactive)
 		execute_hshrc();
