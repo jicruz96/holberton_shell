@@ -15,11 +15,16 @@ void execute_hshrc(void)
 
 	/* go get .hshrc file descriptor */
 	hshrc_fd = open(path, O_RDONLY);
-	if (hshrc_fd == -1 && errno != ENOENT)
+	if (hshrc_fd == -1)
 	{
-		sprintf(bah, "%s: %s", shell.name, path);
-		perror(bah);
+		if (errno != ENOENT)
+		{
+			sprintf(bah, "%s: %s", shell.name, path);
+			perror(bah);
+		}
 	}
-
-	execute_file(hshrc_fd);
+	else
+	{
+		execute_file(hshrc_fd);
+	}
 }
