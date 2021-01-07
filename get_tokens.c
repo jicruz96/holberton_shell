@@ -15,7 +15,6 @@ char **get_tokens(int fd)
 	buf = _getline(fd);
 	if (buf == NULL)
 		return (NULL);
-	buf = _realloc(buf, 1024);
 	line = buf;
 
 	/*  Create array for 256 tokens (strings) */
