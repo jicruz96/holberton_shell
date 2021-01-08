@@ -10,8 +10,11 @@ char *get_prompt(int fd)
 	int i, j;
 	char *prompt, *str = NULL, *tmp = NULL;
 	format_match_t matchers[] = {{'d', &get_date_prompt},
-	{'H', &get_hostname_prompt}, {'s', &get_shellname_prompt},
-	{'u', &get_username_prompt}, {'w', &get_cwd_prompt}, {'\0', NULL}};
+								 {'H', &get_hostname_prompt},
+								 {'s', &get_shellname_prompt},
+								 {'u', &get_username_prompt},
+								 {'w', &get_cwd_prompt},
+								 {'\0', NULL}};
 
 	if (!isatty(fd))
 		return (_strdup(""));
@@ -30,9 +33,7 @@ char *get_prompt(int fd)
 				{
 					str = matchers[j].formatter();
 					tmp = _realloc(tmp, _strlen(str) + _strlen(prompt) - 1);
-					_strncpy(tmp, prompt, i);
-					_strcat(tmp, str);
-					_strcat(tmp, prompt + i + 2);
+					sprintf(tmp, "%.*s%s%s", i, prompt, str, prompt + i + 2);
 					free(prompt);
 					free(str);
 					prompt = _strdup(tmp);

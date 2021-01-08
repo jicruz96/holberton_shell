@@ -1,52 +1,6 @@
 #include "shell.h"
 
 /**
- * execute_commands - wrapper for pipes vs non pipes
- * @command: command node
- * Return: status
- */
-int execute_commands(command_t *command)
-{
-	int stdin_cpy = dup(STDIN_FILENO), stdout_cpy = dup(STDOUT_FILENO);
-	int input_fd = STDIN_FILENO, output_fd, pipefds[2];
-	command_t *tmp;
-
-	for (tmp = command; tmp && shell.run; tmp = tmp->next)
-	{
-		/* Get input and output */
-		if (input_fd == STDIN_FILENO)
-			input_fd = get_input_fd(tmp);
-		output_fd = get_output_fd(tmp);
-
-		/* If pipe, create pipe, set output to pipe writer */
-		if (tmp->logic & IS_PIPE)
-			pipe(pipefds), output_fd = pipefds[1];
-
-		/* Redirect stdin and stdout to the input and output */
-		dup2(input_fd, STDIN_FILENO), dup2(output_fd, STDOUT_FILENO);
-		if (tmp->executor)
-			shell.status = tmp->executor(tmp->args);
-		else
-			fork_and_exec(tmp);
-
-		/* Redirect input and output to stdin and stdout */
-		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
-
-		/* Clean pipes and GTFO if needed */
-		if (clean_pipes(tmp, &input_fd, &output_fd) == false)
-		{
-			if (tmp->logic & IS_PIPE)
-				close(pipefds[0]);
-			break;
-		}
-		if (tmp->logic & IS_PIPE)
-			input_fd = pipefds[0];
-	}
-
-	return (shell.status);
-}
-
-/**
  * fork_and_exec - forks and executes
  * @cmd: command node
  **/
@@ -126,11 +80,9 @@ int get_input_fd(command_t *cmd)
  * @cmd: cmd
  * @input_fd: input fd
  * @output_fd: output_fd
- * Return: true or false
  **/
-int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
+void clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 {
-
 	if (*input_fd > 2)
 		close(*input_fd);
 	if (*output_fd > 2)
@@ -140,8 +92,9 @@ int clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 	*output_fd = STDOUT_FILENO;
 
 	if (shell.status && (cmd->logic & IS_AND))
-		return (false);
+		shell.run = false;
 	if (!shell.status && (cmd->logic & IS_OR))
-		return (false);
-	return (true);
+		shell.run = false;
+
+	free_command_chain(cmd);
 }

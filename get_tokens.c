@@ -60,13 +60,15 @@ char *replace_vars(char *token)
 		value = int_to_str(shell.status);
 	else /* else, get variable value from environment */
 		value = _getenv(token + i + 1);
-
 	/* Create token */
+	if (value == NULL)
+		value = "";
 	new_token = _realloc(NULL, i + _strlen(value) + 1);
 	sprintf(new_token, "%.*s%s", i, token, value); /* dope-ass printf logic */
 	free(token);								   /* free old token */
-	free(value);								   /* free value buffer */
-	return (replace_vars(new_token));			   /* check for more variables */
+	if (*value)
+		free(value);				  /* free value buffer */
+	return (replace_vars(new_token)); /* check for more variables */
 }
 
 /**
