@@ -9,7 +9,6 @@ void execute_file(int fd)
 {
 	char **tokens = NULL;
 	char *prompt;
-	command_t *commands = NULL;
 
 	while (shell.run)
 	{
@@ -22,10 +21,8 @@ void execute_file(int fd)
 			free(prompt);
 			break;
 		}
-		commands = make_commands(tokens);
-		execute_commands(commands);
+		execute_line(tokens);
 		shell.lines++;
-		free_command_chain(commands);
 		free(tokens);
 		free(prompt);
 	}

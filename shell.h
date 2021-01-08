@@ -78,6 +78,18 @@ typedef struct command_s
 } command_t;
 
 /**
+ * struct alias_s - struct that defines an alias 
+ * @alias: alias name
+ * @value: value of alias 
+ */
+typedef struct alias_s
+{
+	char *alias;
+	char *value;
+	struct alias_s *next;
+} alias_t;
+
+/**
  * struct shell_s - shell struct
  * @name: shell name
  * @prompt: shell prompt
@@ -102,6 +114,7 @@ typedef struct shell_s
 	int interactive;
 	int history_size;
 	pid_t pid;
+	alias_t *aliases;
 } shell_t;
 
 /**
@@ -125,8 +138,11 @@ char *_getenv(char *key);
 char *get_prompt(int fd);
 int get_history(char *history[]);
 void execute_file(int fd);
-command_t *command_node_init(char *path);
 
+command_t *command_node_init(char *path);
+command_t *make_command(char **tokens, int *i);
+
+char *get_alias(char *alias);
 void fork_and_exec(command_t *cmd);
 int execute_commands(command_t *command);
 char **_realloc_string_array(char **array, int is_malloced);
@@ -159,9 +175,9 @@ char *get_program_path(char *program);
 char *_getline(const int fd);
 char *parse_line(char **string);
 char **get_tokens(int fd);
-command_t *make_commands(char **tokens);
+void execute_line(char **tokens);
 
-int clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
+void clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
 
 char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);
@@ -177,6 +193,5 @@ char *get_hostname_prompt(void);
 char *get_username_prompt(void);
 char *get_shellname_prompt(void);
 char *get_cwd_prompt(void);
-
 
 #endif /* SHELL_H */

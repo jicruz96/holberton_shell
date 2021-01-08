@@ -1,6 +1,6 @@
 #include "shell.h"
 
-shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0};
+shell_t shell = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /**
  * main - entry point to shell
@@ -10,6 +10,7 @@ shell_t shell = {NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0};
  **/
 int main(int argc, char *argv[])
 {
+	alias_t *tmp;
 	int fd = STDIN_FILENO, i;
 
 	/* If an argument was passed, execute that and exit */
@@ -38,6 +39,12 @@ int main(int argc, char *argv[])
 	for (i = 0; environ[i]; i++)
 		free(environ[i]);
 	free(environ);
+	while (shell.aliases)
+	{
+		tmp = shell.aliases;
+		shell.aliases = shell.aliases->next;
+		free(tmp->alias), free(tmp->value), free(tmp);
+	}
 	return (shell.status);
 }
 
@@ -63,5 +70,6 @@ void shell_init(char *shellname, int input)
 	}
 	shell.lines = 1;
 	shell.run = true;
+	shell.aliases = NULL;
 	environ = _realloc_string_array(environ, 0);
 }

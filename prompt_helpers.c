@@ -19,7 +19,6 @@ char *get_cwd_prompt(void)
 	free(home);
 	return (cwd);
 }
-
 /**
  * get_shellname_prompt - returns shell name for prompt formatted string
  * Return: shellname as string
