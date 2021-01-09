@@ -54,6 +54,9 @@ char *replace_vars(char *token)
 		if (token[i] == '\0')
 			return (token);
 
+	if (!token[i + 1] || token[i + 1] == ' ')
+		return (token);
+
 	if (_strcmp(token + i, "$$") == 0) /* If '$$' get pid */
 		value = int_to_str(shell.pid);
 	else if (_strcmp(token + i, "$?") == 0) /* If 'S?' get prev exit status */

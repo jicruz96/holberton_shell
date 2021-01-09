@@ -29,9 +29,12 @@
 #define SETENV_FAIL 102
 #define SETENV2 103
 #define EXIT_ERROR 104
+#define SYNTAX_ERROR 105
 
 #define IS_NUMERIC(x) ((x) >= '0' && (x) <= '9')
 #define IS_ALPHA(x) (((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z'))
+#define IS_SEPARATOR(x) (!x || x[0] == ';' || x[0] == '|' || !_strcmp(x, "&&"))
+#define IS_REDIR_TOKEN(x) (x[0] == '>' || x[0] == '<')
 
 #define true 1
 #define false 0
@@ -78,9 +81,10 @@ typedef struct command_s
 } command_t;
 
 /**
- * struct alias_s - struct that defines an alias 
+ * struct alias_s - struct that defines an alias
  * @alias: alias name
- * @value: value of alias 
+ * @value: value of alias
+ * @next: next alias value
  */
 typedef struct alias_s
 {
@@ -101,6 +105,7 @@ typedef struct alias_s
  * @interactive: if shell is in interactive mode
  * @history_size: size of history
  * @pid: shell process id
+ * @aliases: alias list
  **/
 typedef struct shell_s
 {
@@ -171,6 +176,9 @@ void handle_pipe(command_t *, char **, int *);
 void shell_init(char *shellname, int input);
 void print_stupid(char *str, int fd);
 
+int print_aliases(void);
+
+
 char *get_program_path(char *program);
 char *_getline(const int fd);
 char *parse_line(char **string);
@@ -183,6 +191,7 @@ char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);
 char *_realloc(char *p, int size);
 
+int handle_syntax_error(char *token);
 int handle_error(int code, char *program, char *supplement);
 int _strlen(char *str);
 char *replace_vars(char *token);

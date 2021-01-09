@@ -12,7 +12,12 @@ char *get_program_path(char *program)
 	char *builtins[] = {"cd", "help", "alias", "setenv", "unsetenv", "exit",
 						"history", "env", NULL};
 
-	/* If program is builtin, don't search path, just return copy of program */
+	/* If program is a path, return copy of program */
+	for (i = 0; program[i]; i++)
+		if (program[i] == '/')
+			return (_strdup(program));
+
+	/* If program is builtin or, return copy of program */
 	for (i = 0; builtins[i]; i++)
 		if (_strcmp(builtins[i], program) == 0)
 			return (_strdup(program));
@@ -34,5 +39,5 @@ char *get_program_path(char *program)
 
 	free(PATH);
 	free(buffer);
-	return (_strdup(program));
+	return (NULL);
 }

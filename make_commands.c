@@ -1,6 +1,4 @@
 #include "shell.h"
-#define IS_NOT_SEPARATOR(x) (x && x[0] != ';' && x[0] != '|' && \
-							 (_strcmp(x, "&&")))
 
 /**
  * execute_line - makes linked list of commands from tokens
@@ -17,6 +15,11 @@ void execute_line(char **tokens)
 	for (i = 0; tokens[i] && shell.run; i++)
 	{
 		/* MAKE COMMAND */
+		if (IS_SEPARATOR(tokens[i]) || IS_REDIR_TOKEN(tokens[i]))
+		{
+			handle_syntax_error(tokens[i]);
+			return;
+		}
 		cmd = make_command(tokens, &i);
 
 		/* Get input file_descriptor */
@@ -24,7 +27,6 @@ void execute_line(char **tokens)
 			input_fd = pipefds[0];
 		else
 			input_fd = get_input_fd(cmd);
-
 		/* get output file descriptor */
 		output_fd = get_output_fd(cmd);
 		if ((cmd->logic & IS_PIPE) && !(cmd->logic & IS_REDIR_OUT))
@@ -41,8 +43,7 @@ void execute_line(char **tokens)
 
 		/* Redirect input and output back to stdin and stdout */
 		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
-
-		/* Clean pipes and GTFO if needed */
+		/* Clean pipes */
 		prev_logic = cmd->logic;
 		clean_pipes(cmd, &input_fd, &output_fd);
 	}
@@ -60,7 +61,7 @@ command_t *make_command(char **tokens, int *i)
 	command_t *cmd = command_node_init(replace_vars(tokens[(*i)++]));
 
 	/* COMMAND READING LOOP (ENDS WHEN THE COMMANDS ENDS*/
-	for (j = 1; IS_NOT_SEPARATOR(tokens[*i]); (*i)++)
+	for (j = 1; !IS_SEPARATOR(tokens[*i]); (*i)++)
 	{
 		/* Detect file redirectors */
 		if (tokens[*i][0] == '<')
