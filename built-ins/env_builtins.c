@@ -28,20 +28,15 @@ int builtin_setenv(char **args)
 	char *VARIABLE, *VALUE, *var = NULL;
 
 	/* if only "setenv" passed in, call env */
-	if (args[1] == NULL)
-		return (builtin_env(args));
+	if (args[1] == NULL || args[2] == NULL)
+	{
+		dprintf(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n");
+		return (1);
+	}
 
 	/* retrieve our env variable and new corresponding value */
 	VARIABLE = args[1];
-	VALUE = (args[2]) ? args[2] : "";
-
-	/* Verify value */
-	if (!IS_ALPHA(*VARIABLE))
-		return (handle_error(SETENV2, "setenv", NULL));
-
-	for (i = 1; VARIABLE[i]; i++)
-		if (!IS_ALPHA(VARIABLE[i]) && !IS_NUMERIC(VARIABLE[i]))
-			return (handle_error(SETENV_FAIL, "setenv", NULL));
+	VALUE = args[2];
 
 	/* construct env var */
 	ENV_VAR = malloc(sizeof(char) * 256);
@@ -77,7 +72,10 @@ int builtin_unsetenv(char **args)
 
 	/* if no arguments were given, print error */
 	if (args[1] == NULL)
-		return (handle_error(UNSETENV_FAIL, "unsetenv", NULL));
+	{
+		dprintf(STDERR_FILENO, "Usage: unsetenv VARIABLE\n");
+		return (1);
+	}
 
 	UNSET_VARIABLE = args[1];
 

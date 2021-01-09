@@ -15,9 +15,6 @@ int handle_error(int code, char *program, char *supplement)
 					  {EACCES, 126, "Permission denied"},
 					  {CD_FAIL, 2, "can't cd to %s"},
 					  {EXIT_ERROR, 2, "Illegal number: %s"},
-					  {UNSETENV_FAIL, 1, "Too few arguments."},
-					  {SETENV_FAIL, 1, "Variable name must contain alphanumeric characters."},
-					  {SETENV2, 1, "Variable name must begin with a letter"},
 					  {SYNTAX_ERROR, 2, "%s unexpected"},
 					  {0, 0, NULL}};
 	int i, lines = shell.lines;
