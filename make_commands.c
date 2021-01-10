@@ -45,8 +45,8 @@ void execute_line(char **tokens)
 		if (!clean_pipes(cmd, &input_fd, &output_fd))
 			break;
 	}
-	while (tokens[i])
-		free(tokens[i++]);
+	while (tokens[++i])
+		free(tokens[i]);
 }
 
 /**
@@ -92,7 +92,7 @@ command_t *make_command(char **tokens, int *i)
 			cmd->logic |= (tokens[*i][1] == '|') ? IS_OR : IS_PIPE;
 		else if (_strcmp(tokens[*i], "&&") == 0)
 			cmd->logic |= IS_AND;
-		free(tokens[(*i)++]);
+		free(tokens[(*i)]);
 	}
 
 	return (cmd);
