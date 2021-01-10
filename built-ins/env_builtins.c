@@ -10,7 +10,10 @@ int builtin_env(char **args)
 	int i;
 
 	for (i = 0; environ[i]; i++)
-		printf("%s\n", environ[i]);
+	{
+		write(STDOUT_FILENO, environ[i], _strlen(environ[i]));
+		write(STDOUT_FILENO, "\n", 1);
+	}
 
 	(void)args;
 	return (0);
