@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/errno.h>
@@ -185,7 +186,7 @@ char *parse_line(char **string);
 char **get_tokens(int fd);
 void execute_line(char **tokens);
 
-void clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
+bool clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
 
 char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);

@@ -80,9 +80,12 @@ int get_input_fd(command_t *cmd)
  * @cmd: cmd
  * @input_fd: input fd
  * @output_fd: output_fd
+ * Return: to keep running shell or not
  **/
-void clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
+bool clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 {
+	int logic = cmd->logic;
+
 	if (*input_fd > 2)
 		close(*input_fd);
 	if (*output_fd > 2)
@@ -91,10 +94,12 @@ void clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
 	*input_fd = STDIN_FILENO;
 	*output_fd = STDOUT_FILENO;
 
-	if (shell.status && (cmd->logic & IS_AND))
-		shell.run = false;
-	if (!shell.status && (cmd->logic & IS_OR))
-		shell.run = false;
-
 	free_command_chain(cmd);
+
+	if (shell.status && (logic & IS_AND))
+		return (false);
+	if (!shell.status && (logic & IS_OR))
+		return (false);
+
+	return (true);
 }

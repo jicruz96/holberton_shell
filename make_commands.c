@@ -31,22 +31,22 @@ void execute_line(char **tokens)
 		output_fd = get_output_fd(cmd);
 		if ((cmd->logic & IS_PIPE) && !(cmd->logic & IS_REDIR_OUT))
 			pipe(pipefds), output_fd = pipefds[1];
-
 		/* Redirect stdin and stdout to the input and output */
 		dup2(input_fd, STDIN_FILENO), dup2(output_fd, STDOUT_FILENO);
-
 		/* EXECUTE COMMAND */
 		if (cmd->executor)
 			shell.status = cmd->executor(cmd->args);
 		else
 			fork_and_exec(cmd);
-
 		/* Redirect input and output back to stdin and stdout */
 		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
 		/* Clean pipes */
 		prev_logic = cmd->logic;
-		clean_pipes(cmd, &input_fd, &output_fd);
+		if (!clean_pipes(cmd, &input_fd, &output_fd))
+			break;
 	}
+	while (tokens[i])
+		free(tokens[i++]);
 }
 
 /**
@@ -92,7 +92,7 @@ command_t *make_command(char **tokens, int *i)
 			cmd->logic |= (tokens[*i][1] == '|') ? IS_OR : IS_PIPE;
 		else if (_strcmp(tokens[*i], "&&") == 0)
 			cmd->logic |= IS_AND;
-		free(tokens[*(i++)]);
+		free(tokens[(*i)++]);
 	}
 
 	return (cmd);
