@@ -69,7 +69,7 @@ command_t *make_command(char **tokens, int *i)
 			cmd->logic |= (tokens[*i][1] == '<') ? IS_HEREDOC : IS_REDIR_IN;
 			free(tokens[(*i)++]), cmd->input = replace_vars(tokens[*i]);
 		}
-		else if (**tokens == '>')
+		else if (tokens[*i][0] == '>')
 		{
 			cmd->logic |= (tokens[*i][0] == '>') ? IS_APPEND : IS_REDIR_OUT;
 			free(tokens[(*i)++]), cmd->output = replace_vars(tokens[*i]);

@@ -1,4 +1,5 @@
 #include "shell.h"
+#define CANT_OPEN 127
 
 shell_t shell = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
 		if (fd == -1)
 		{
 			dprintf(STDERR_FILENO, "%s: 0: Can't open %s\n", argv[0], argv[1]);
-			return (errno);
+			return (CANT_OPEN);
 		}
 		shell_init(argv[1], fd);
 	}

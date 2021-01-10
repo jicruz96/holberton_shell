@@ -8,13 +8,15 @@
 char *get_alias(char *alias)
 {
 	alias_t *tmp = shell.aliases;
+	char *str;
 
 	if (shell.aliases)
 		for (; tmp; tmp = tmp->next)
 			if (_strcmp(alias, tmp->alias) == 0)
 			{
 				free(alias);
-				return (_strdup(tmp->value));
+				str = get_alias(_strdup(tmp->value));
+				return (str);
 			}
 
 	return (alias);
