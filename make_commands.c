@@ -9,7 +9,7 @@ void execute_line(char **tokens)
 {
 	command_t *cmd = NULL;
 	int stdin_cpy = dup(STDIN_FILENO), stdout_cpy = dup(STDOUT_FILENO);
-	int input_fd = STDIN_FILENO, output_fd, prev_logic = 0, pipefds[2], i;
+	int input_fd = -1, output_fd = -1, prev_logic = 0, pipefds[2], i;
 
 	/* Loop through all tokens while shell is running */
 	for (i = 0; tokens[i] && shell.run; i++)
@@ -17,30 +17,29 @@ void execute_line(char **tokens)
 		/* MAKE COMMAND */
 		if (IS_SEPARATOR(tokens[i]) || IS_REDIR_TOKEN(tokens[i]))
 		{
-			handle_syntax_error(tokens[i]);
-			return;
+			shell.status = handle_syntax_error(tokens[i--]);
+			break;
 		}
 		cmd = make_command(tokens, &i);
 
-		/* Get input file_descriptor */
-		if (prev_logic & IS_PIPE)
+		if (prev_logic & IS_PIPE) /* get input_fd */
 			input_fd = pipefds[0];
 		else
 			input_fd = get_input_fd(cmd);
-		/* get output file descriptor */
-		output_fd = get_output_fd(cmd);
-		if ((cmd->logic & IS_PIPE) && !(cmd->logic & IS_REDIR_OUT))
+		if (input_fd == -1)
+			goto END;
+		output_fd = get_output_fd(cmd); /* get output fd */
+		if (output_fd == -1)
+			goto END;
+		if ((cmd->logic & IS_PIPE) && !(cmd->logic & (IS_REDIR_OUT | IS_APPEND)))
 			pipe(pipefds), output_fd = pipefds[1];
-		/* Redirect stdin and stdout to the input and output */
 		dup2(input_fd, STDIN_FILENO), dup2(output_fd, STDOUT_FILENO);
-		/* EXECUTE COMMAND */
-		if (cmd->executor)
+		if (cmd->executor) /* execute command */
 			shell.status = cmd->executor(cmd->args);
 		else
 			fork_and_exec(cmd);
-		/* Redirect input and output back to stdin and stdout */
 		dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
-		/* Clean pipes */
+END:
 		prev_logic = cmd->logic;
 		if (!clean_pipes(cmd, &input_fd, &output_fd))
 			break;

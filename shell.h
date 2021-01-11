@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/errno.h>
 #include <sys/types.h>
@@ -31,6 +32,7 @@
 #define SETENV2 103
 #define EXIT_ERROR 104
 #define SYNTAX_ERROR 105
+#define INPUT_FAIL 106
 
 #define IS_NUMERIC(x) ((x) >= '0' && (x) <= '9')
 #define IS_ALPHA(x) (((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z'))

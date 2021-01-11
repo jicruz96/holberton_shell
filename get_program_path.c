@@ -8,6 +8,7 @@
 char *get_program_path(char *program)
 {
 	int i;
+	struct stat jeffrey;
 	char *PATH, *path = NULL, *buffer = NULL;
 	char *builtins[] = {"cd", "help", "alias", "setenv", "unsetenv", "exit",
 						"history", "env", NULL};
@@ -30,7 +31,7 @@ char *get_program_path(char *program)
 	{
 		/* concat path with slash and program name */
 		sprintf(buffer, "%s/%s", path, program);
-		if (access(buffer, X_OK) == 0)
+		if (stat(buffer, &jeffrey) == 0)
 		{
 			free(PATH);
 			return (buffer);

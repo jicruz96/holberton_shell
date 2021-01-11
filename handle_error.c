@@ -52,7 +52,7 @@ int handle_syntax_error(char *token)
 	if (IS_SEPARATOR(token))
 		sprintf(error_msg, "\"%s\"", token);
 	else
-		_strcpy(error_msg, token);
+		_strcpy(error_msg, "newline");
 
 	return (handle_error(SYNTAX_ERROR, "Syntax error", _strdup(error_msg)));
 }

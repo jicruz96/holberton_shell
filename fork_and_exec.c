@@ -14,8 +14,11 @@ void fork_and_exec(command_t *cmd)
 	{
 		if (cmd->executor)
 			shell.status = cmd->executor(cmd->args);
-		else
+		else if (cmd->path)
 			shell.status = execve(cmd->path, cmd->args, environ);
+		else
+			errno = ENOENT, shell.status = 1;
+
 		if (shell.status)
 			exit(handle_error(errno, cmd->command, NULL));
 		exit(shell.status);
@@ -35,12 +38,34 @@ void fork_and_exec(command_t *cmd)
  **/
 int get_output_fd(command_t *cmd)
 {
-	if (cmd->output)
-	{
-		if (cmd->logic & IS_APPEND)
-			return (open(cmd->output, O_CREAT | O_RDWR | O_APPEND, 0644));
+	int fd, perms;
+	char error_msg[256], *str = "%s: %d: cannot open %s: ";
 
-		return (open(cmd->output, O_CREAT | O_RDWR | O_TRUNC, 0644));
+	if (cmd->logic & (IS_REDIR_OUT | IS_APPEND))
+	{
+		if (cmd->output == NULL)
+		{
+			fd = handle_syntax_error(cmd->logic & IS_APPEND ? ">>" : ">");
+			shell.status = fd; /* this just exists to get prev line under 80 */
+			return (-1);
+		}
+		if (cmd->logic & IS_APPEND)
+			perms = O_CREAT | O_RDWR | O_APPEND;
+		else
+			perms = O_CREAT | O_RDWR | O_TRUNC;
+
+		fd = open(cmd->output, perms, 0644);
+		if (fd == -1)
+		{
+			sprintf(error_msg, str, shell.name, shell.lines, cmd->output);
+			if (errno == ENOENT)
+				_strcat(error_msg, "No such file\n");
+			else
+				_strcat(error_msg, "Permission denied\n");
+			write(STDERR_FILENO, error_msg, _strlen(error_msg));
+			return (-1);
+		}
+		return (fd);
 	}
 	return (STDOUT_FILENO);
 }
@@ -52,22 +77,40 @@ int get_output_fd(command_t *cmd)
  **/
 int get_input_fd(command_t *cmd)
 {
-	int pipefds[2];
+	int pipefds[2], fd;
+	char error_msg[256], *str = "%s: %d: cannot open %s: ";
 
 	if (cmd->logic & IS_REDIR_IN)
-		return (open(cmd->input, O_RDONLY));
+	{
+		if (cmd->input == NULL)
+		{
+			shell.status = handle_syntax_error("<");
+			return (-1);
+		}
+
+		fd = open(cmd->input, O_RDONLY);
+		if (fd == -1)
+		{
+			sprintf(error_msg, str, shell.name, shell.lines, cmd->input);
+			if (errno == ENOENT)
+				_strcat(error_msg, "No such file\n");
+			else
+				_strcat(error_msg, "Permission denied\n");
+			write(STDERR_FILENO, error_msg, _strlen(error_msg));
+			return (-1);
+		}
+		return (fd);
+	}
 
 	if ((cmd->logic & IS_HEREDOC) && cmd->args[1] == NULL)
 	{
 		/* make pipe for heredoc */
 		pipe(pipefds);
-
 		/* write contents onto pipe */
-		write(pipefds[1], cmd->input, _strlen(cmd->input));
-
+		if (cmd->input)
+			write(pipefds[1], cmd->input, _strlen(cmd->input));
 		/* close writing side of pipe */
 		close(pipefds[1]);
-
 		/* set input to reading side of pipe */
 		return (pipefds[0]);
 	}

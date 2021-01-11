@@ -15,19 +15,22 @@ int builtin_cd(char **args)
 
 	/* set new directory target */
 	if (_strcmp(args[1], "-") == 0)
+	{
 		new[2] = _getenv("OLDPWD"), print_dir = true;
+	}
 	else
+	{
 		new[2] = _strdup(args[1]);
+		/* if no dir found/provided, change to home dir */
+		if (!new[2] || !new[2][0])
+			free(new[2]), new[2] = _getenv("HOME");
+	}
 
-	/* if no dir found/provided, change to home dir */
-	if (!new[2] || !new[2][0])
-		free(new[2]), new[2] = _getenv("HOME");
 
 	/* if no home dir found, just stay in cwd! */
 	if (!new[2] || !new[2][0])
-		free(new[2]), new[2] = OLDPWD[2];
+		free(new[2]), new[2] = _strdup(OLDPWD[2]);
 
-	/* change directory */
 	if (chdir(new[2]) == -1)
 		return (handle_error(CD_FAIL, "cd", new[2]));
 
@@ -39,10 +42,6 @@ int builtin_cd(char **args)
 
 	/* update environment */
 	builtin_setenv(OLDPWD), builtin_setenv(new);
-
-	/* free new[2] if it points to malloc'd memory */
-	if (new[2] != OLDPWD[2])
-		free(new[2]);
-
+	free(new[2]);
 	return (EXIT_SUCCESS);
 }

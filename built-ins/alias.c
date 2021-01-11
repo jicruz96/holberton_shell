@@ -32,7 +32,7 @@ int builtin_alias(char **args)
 	int i = 0, j, status = 0;
 	static alias_t *last;
 	alias_t *tmp = shell.aliases, **connector;
-	char error_msg[256], *str = "%s: %s: not found\n";
+	char error_msg[256], *str = "%s: %s not found\n";
 
 	if (args[1] == NULL)
 		return (print_aliases());
@@ -40,7 +40,7 @@ int builtin_alias(char **args)
 	{
 		for (j = 0; args[i][j] && args[i][j] != '='; j++)
 			;
-		if (args[i][j] == '=')
+		if (args[i][j] == '=' && j)
 		{
 			for (tmp = shell.aliases; tmp; tmp = tmp->next)
 				if (_strncmp(tmp->alias, args[i], j) == 0)
@@ -56,7 +56,7 @@ int builtin_alias(char **args)
 		}
 		else if (print_alias(args[i]) == 0)
 		{
-			sprintf(error_msg, str, error_msg, *args, args[i]);
+			sprintf(error_msg, str, args[0], args[i]);
 			write(STDERR_FILENO, error_msg, _strlen(error_msg));
 			status = 1;
 		}
@@ -75,13 +75,10 @@ int print_alias(char *alias)
 
 	for (tmp = shell.aliases; tmp; tmp = tmp->next)
 		if (_strcmp(tmp->alias, alias) == 0)
-			break;
-
-	if (tmp)
-	{
-		printf("%s='%s'\n", tmp->alias, tmp->value);
-		return (1);
-	}
+		{
+			printf("%s='%s'\n", tmp->alias, tmp->value);
+			return (1);
+		}
 	return (0);
 }
 

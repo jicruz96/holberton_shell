@@ -49,6 +49,9 @@ char *replace_vars(char *token)
 	char *new_token, *value;
 	int i;
 
+	if (!token)
+		return (NULL);
+
 	/* check for a '$' . If no dollar signs, return token */
 	for (i = 0; token[i] != '$'; i++)
 		if (token[i] == '\0')
@@ -84,6 +87,9 @@ char *get_heredoc(char **line, int fd)
 {
 	char *token = NULL, *end_tag = parse_line(line), *tmp;
 	int token_length = 0, searching_for_end_tag = true;
+
+	if (end_tag == NULL)
+		return (NULL);
 
 	while (searching_for_end_tag)
 	{
