@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 {
 	alias_t *tmp;
 	int fd = STDIN_FILENO, i;
+	char error_msg[256];
 
 	/* If an argument was passed, execute that and exit */
 	if (argc > 1)
@@ -20,7 +21,8 @@ int main(int argc, char *argv[])
 		fd = open(argv[1], O_RDONLY);
 		if (fd == -1)
 		{
-			dprintf(STDERR_FILENO, "%s: 0: Can't open %s\n", argv[0], argv[1]);
+			sprintf(error_msg, "%s: 0: Can't open %s\n", argv[0], argv[1]);
+			write(STDERR_FILENO, error_msg, _strlen(error_msg));
 			return (CANT_OPEN);
 		}
 		shell_init(argv[1], fd);

@@ -178,7 +178,7 @@ void shell_init(char *shellname, int input);
 void print_stupid(char *str, int fd);
 
 int print_aliases(void);
-
+int print_alias(char *alias);
 
 char *get_program_path(char *program);
 char *_getline(const int fd);

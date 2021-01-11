@@ -32,7 +32,10 @@ int builtin_cd(char **args)
 		return (handle_error(CD_FAIL, "cd", new[2]));
 
 	if (print_dir)
-		printf("%s\n", new[2]);
+	{
+		write(STDOUT_FILENO, new[2], _strlen(new[2]));
+		write(STDOUT_FILENO, "\n", 1);
+	}
 
 	/* update environment */
 	builtin_setenv(OLDPWD), builtin_setenv(new);

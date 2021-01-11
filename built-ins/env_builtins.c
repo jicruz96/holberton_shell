@@ -33,7 +33,7 @@ int builtin_setenv(char **args)
 	/* if only "setenv" passed in, call env */
 	if (args[1] == NULL || args[2] == NULL)
 	{
-		dprintf(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n");
+		write(STDERR_FILENO, "Usage: setenv VARIABLE VALUE\n", 29);
 		return (1);
 	}
 
@@ -76,7 +76,7 @@ int builtin_unsetenv(char **args)
 	/* if no arguments were given, print error */
 	if (args[1] == NULL)
 	{
-		dprintf(STDERR_FILENO, "Usage: unsetenv VARIABLE\n");
+		write(STDERR_FILENO, "Usage: unsetenv VARIABLE\n", 25);
 		return (1);
 	}
 

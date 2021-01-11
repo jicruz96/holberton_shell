@@ -9,7 +9,7 @@
  **/
 int handle_error(int code, char *program, char *supplement)
 {
-	char ugh[256];
+	char ugh[256], error_msg[256];
 	code_t codes[] = {{ENOENT, 127, "not found"},
 					  {EFAULT, 127, "not found"},
 					  {EACCES, 126, "Permission denied"},
@@ -28,7 +28,8 @@ int handle_error(int code, char *program, char *supplement)
 			else
 				_strcpy(ugh, codes[i].msg);
 
-			dprintf(STDERR_FILENO, str, name, lines, program, ugh);
+			sprintf(error_msg, str, name, lines, program, ugh);
+			write(STDERR_FILENO, error_msg, _strlen(error_msg));
 			free(supplement);
 			return (codes[i].shell_code);
 		}
@@ -47,7 +48,6 @@ int handle_error(int code, char *program, char *supplement)
 int handle_syntax_error(char *token)
 {
 	char error_msg[256];
-
 
 	if (IS_SEPARATOR(token))
 		sprintf(error_msg, "\"%s\"", token);

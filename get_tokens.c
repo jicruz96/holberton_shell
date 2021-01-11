@@ -88,7 +88,7 @@ char *get_heredoc(char **line, int fd)
 	while (searching_for_end_tag)
 	{
 		if (isatty(fd)) /* print PS2 prompt if stdin is terminal */
-			dprintf(fd, PS2);
+			write(fd, PS2, _strlen(PS2));
 
 		/* get next line */
 		tmp = _getline(fd);
@@ -126,7 +126,7 @@ char *fix_dquote(char **line, char *token, int fd)
 	while (searching_for_dquote)
 	{
 		if (shell.interactive) /* print PS2 prompt if stdin is terminal */
-			dprintf(fd, PS2);
+			write(fd, PS2, _strlen(PS2));
 
 		/* save next line to end of buf */
 		tmp = _getline(fd);
