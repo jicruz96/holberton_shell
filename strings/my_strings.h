@@ -1,10 +1,12 @@
 #ifndef MY_STRINGS_H
 #define MY_STRINGS_H
 
+
 #ifndef NULL
 #define NULL ((void *)0)
-#endif
+#endif /* NULL */
 
+void _puts(char *s);
 int _strlen(char *str);
 int _strcmp(char *s1, char *s2);
 int _strncmp(char *s1, char *s2, int n);
