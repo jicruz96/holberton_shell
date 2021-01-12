@@ -8,21 +8,25 @@
 int get_history(char *history[])
 {
 	char path[256], *line = NULL, *homedir = _getenv("HOME");
-	int i = 0, fd;
+	int i = 0, history_fd;
 
+	/* create path to history file */
 	sprintf(path, "%s/%s", homedir, ".hsh_history");
 	free(homedir);
 
-	fd = open(path, O_CREAT | O_RDONLY, 0644);
+	history_fd = open(path, O_CREAT | O_RDONLY, 0644);
 
-	for (i = 0; (line = _getline(fd)); i++)
+	/* copying history file contents to history struct */
+	for (i = 0; (line = _getline(history_fd)); i++)
 	{
+		/* if 4096th command, then erase array and start as first command */
 		if (i == HISTSIZE)
 			while (i)
 				free(history[i]), history[i--] = NULL;
 		history[i] = line;
 	}
 
-	close(fd);
+	/* close history file */
+	close(history_fd);
 	return (i);
 }
