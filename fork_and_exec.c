@@ -117,32 +117,3 @@ int get_input_fd(command_t *cmd)
 
 	return (STDIN_FILENO);
 }
-
-/**
- * clean_pipes - clean pipes
- * @cmd: cmd
- * @input_fd: input fd
- * @output_fd: output_fd
- * Return: to keep running shell or not
- **/
-bool clean_pipes(command_t *cmd, int *input_fd, int *output_fd)
-{
-	int logic = cmd->logic;
-
-	if (*input_fd > 2)
-		close(*input_fd);
-	if (*output_fd > 2)
-		close(*output_fd);
-
-	*input_fd = STDIN_FILENO;
-	*output_fd = STDOUT_FILENO;
-
-	free_command_chain(cmd);
-
-	if (shell.status && (logic & IS_AND))
-		return (false);
-	if (!shell.status && (logic & IS_OR))
-		return (false);
-
-	return (true);
-}
