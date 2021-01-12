@@ -11,7 +11,7 @@ void help_help(void)
 		"\tDisplay helpful information about builtin commands.",
 		NULL
 	};
-	
+
 	for (i = 0; lines[i]; i++)
 		_puts(lines[i]);
 }
