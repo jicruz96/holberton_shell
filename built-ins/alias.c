@@ -48,10 +48,14 @@ int builtin_alias(char **args)
 			if (!tmp)
 			{
 				tmp = malloc(sizeof(alias_t));
-				tmp->alias = _strndup(args[i], j), tmp->next = NULL;
+				tmp->alias = _strndup(args[i], j);
+				tmp->next = NULL;
 				connector = last ? &last->next : &shell.aliases;
-				*connector = tmp, last = tmp;
+				*connector = tmp;
+				last = tmp;
+				tmp->value = NULL;
 			}
+			free(tmp->value);
 			tmp->value = _strdup(args[i] + j + 1);
 		}
 		else if (print_alias(args[i]) == 0)
