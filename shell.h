@@ -206,4 +206,12 @@ char *get_username_prompt(void);
 char *get_shellname_prompt(void);
 char *get_cwd_prompt(void);
 
+/* help function declarations */
+int builtin_help(char **args);
+void help_help(void);
+void help_alias(void);
+void help_exit(void);
+void help_cd(void);
+void help_history(void);
+int help_environment(char *);
 #endif /* SHELL_H */
