@@ -65,10 +65,9 @@ typedef struct format_match_s
  * @args:       array of arguments for command (first argument must be command)
  * @input:      input name as string
  * @output:     output name as string
- * @extra_fd:	extra file descriptor (if 'n>' redirection, extra_fd = n)
+ * @input_fd:	input fd
+ * @output_fd:	output_fd
  * @executor:	function that executes command
- * @next:       pointer to next command struct
- * @prev:       pointer to previous command struct
  **/
 typedef struct command_s
 {
