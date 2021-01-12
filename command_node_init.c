@@ -17,14 +17,13 @@ command_t *command_node_init(char *command)
 	new->command = command;
 	new->path = get_program_path(command);
 	new->executor = get_executor(command);
-	new->extra_fd = 0;
 	new->input = NULL;
 	new->output = NULL;
+	new->input_fd = STDIN_FILENO;
+	new->output_fd = STDOUT_FILENO;
 	new->args = malloc(sizeof(char *) * 256);
 	new->args[0] = command;
 	for (i = 1; i < 256; i++)
 		new->args[i] = NULL;
-	new->next = NULL;
-	new->prev = NULL;
 	return (new);
 }
