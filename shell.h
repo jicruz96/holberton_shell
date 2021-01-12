@@ -33,6 +33,7 @@
 #define EXIT_ERROR 104
 #define SYNTAX_ERROR 105
 #define INPUT_FAIL 106
+#define CANT_OPEN 127
 
 #define IS_NUMERIC(x) ((x) >= '0' && (x) <= '9')
 #define IS_ALPHA(x) (((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z'))
@@ -77,10 +78,9 @@ typedef struct command_s
 	char **args;
 	char *input;
 	char *output;
-	int extra_fd;
+	int input_fd;
+	int output_fd;
 	exec_f executor;
-	struct command_s *next;
-	struct command_s *prev;
 } command_t;
 
 /**
@@ -172,7 +172,6 @@ int get_output_fd(command_t *cmd);
 void save_line_to_history(char *line);
 void save_history_to_file(void);
 void sigint_handler(int signum);
-void free_command_chain(command_t *head);
 void handle_redir(command_t *, char **, int *);
 void handle_and(command_t *, char **, int *);
 void handle_pipe(command_t *, char **, int *);
@@ -188,7 +187,9 @@ char *parse_line(char **string);
 char **get_tokens(int fd);
 void execute_line(char **tokens);
 
-bool clean_pipes(command_t *cmd, int *input_fd, int *output_fd);
+void shell_cleanup(void);
+int get_IO(command_t *cmd, int prev_logic);
+bool clean_pipes(command_t *cmd);
 
 char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);
