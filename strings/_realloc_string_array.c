@@ -9,8 +9,9 @@
 char **_realloc_string_array(char **array, int is_malloced)
 {
 	char **new = NULL;
-	int i;
+	int i, size = 2;
 
+	/* if array is NULL, allocate memory for one string and return */
 	if (!array)
 	{
 		new = malloc(sizeof(char *));
@@ -18,18 +19,21 @@ char **_realloc_string_array(char **array, int is_malloced)
 		return (new);
 	}
 
+	/* calculate size of array */
 	for (i = 0; array[i]; i++)
-		;
+		size += 1;
+	
+	/* allocate memory for new array with two spaces more than previous */
+	new = malloc(sizeof(char *) * size);
 
-	new = malloc(sizeof(array) * (i + 2));
+	/* copy over strings from array onto new */
 	for (i = 0; array[i]; i++)
 	{
 		new[i] = _strdup(array[i]);
 		if (is_malloced)
-		{
 			free(array[i]);
-		}
 	}
+	/* init new values made to null */
 	new[i] = NULL;
 	new[i + 1] = NULL;
 	if (is_malloced)
