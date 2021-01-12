@@ -140,10 +140,10 @@ int get_IO(command_t *cmd, int prev_logic)
 	if (cmd->input_fd == -1)
 		return (-1);
 
-	if (cmd->logic & IS_PIPE)
+	cmd->output_fd = get_output_fd(cmd); /* get output fd */
+
+	if (cmd->logic & IS_PIPE && !(cmd->logic & (IS_REDIR_OUT | IS_APPEND)))
 		pipe(pipefds), cmd->output_fd = pipefds[1];
-	else
-		cmd->output_fd = get_output_fd(cmd); /* get output fd */
 	if (cmd->output_fd == -1)
 		return (-1);
 	return (1);
