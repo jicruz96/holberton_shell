@@ -22,7 +22,7 @@ char **_realloc_string_array(char **array, int is_malloced)
 	/* calculate size of array */
 	for (i = 0; array[i]; i++)
 		size += 1;
-	
+
 	/* allocate memory for new array with two spaces more than previous */
 	new = malloc(sizeof(char *) * size);
 
