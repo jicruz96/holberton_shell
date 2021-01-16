@@ -11,7 +11,6 @@ int handle_error(int code, char *program, char *supplement)
 {
 	char ugh[256], error_msg[256];
 	code_t codes[] = {{ENOENT, 127, "not found"},
-					  {EFAULT, 127, "not found"},
 					  {EACCES, 126, "Permission denied"},
 					  {CD_FAIL, 2, "can't cd to %s"},
 					  {EXIT_ERROR, 2, "Illegal number: %s"},
