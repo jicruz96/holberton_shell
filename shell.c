@@ -31,8 +31,7 @@ int main(int argc, char *argv[])
 	shell_init(shellname, fd);
 
 	/* EXECUTION */
-	if (shell.interactive)
-		execute_hshrc();
+	execute_hshrc();
 	execute_file(fd);
 
 	/* CLEAN UP */
