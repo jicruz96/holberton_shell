@@ -70,7 +70,7 @@ else:
         exit(1)
 
 # Compile file using make file
-make_error = sp.Popen('make re', shell=True,
+make_error = sp.Popen('make re && make oclean', shell=True,
                       stderr=sp.PIPE).communicate()[1]
 if make_error:
     print("Program does not compile!\n\nError: {}".format(make_error.decode()))

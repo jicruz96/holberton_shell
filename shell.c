@@ -103,30 +103,30 @@ void shell_cleanup(void)
  **/
 void execute_file(int fd)
 {
-	char *prompt, **tokens = NULL;
+	char **tokens = NULL;
 
 	while (shell.run)
 	{
 		/* get and write shell prompt */
-		prompt = get_prompt(fd);
-		write(fd, prompt, _strlen(prompt));
+		shell.prompt = get_prompt(fd);
+		write(fd, shell.prompt, _strlen(shell.prompt));
 		signal(SIGINT, sigint_handler);
 
 		/* respond to user inputs */
 		tokens = get_tokens(fd);
 		if (tokens == NULL)
 		{
-			free(prompt);
+			free(shell.prompt);
 			break;
 		}
 
 		/* execute line */
 		execute_line(tokens);
 		shell.lines++;
-		free(tokens);
 
 		/* cleanup */
-		free(prompt);
+		free(shell.prompt);
+		free(tokens);
 	}
 }
 
