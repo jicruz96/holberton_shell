@@ -61,7 +61,7 @@ command_t *make_command(char **tokens, int *i)
 		}
 		else if (tokens[*i][0] == '>')
 		{
-			cmd->logic |= (tokens[*i][0] == '>') ? IS_APPEND : IS_REDIR_OUT;
+			cmd->logic |= (tokens[*i][1] == '>') ? IS_APPEND : IS_REDIR_OUT;
 			free(tokens[(*i)++]), cmd->output = replace_vars(tokens[*i]);
 		}
 		else if (IS_NUMERIC(tokens[*i][0]) && tokens[*i][1] == '>')
