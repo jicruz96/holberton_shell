@@ -33,11 +33,17 @@ char *get_program_path(char *program)
 		sprintf(buffer, "%s/%s", path, program);
 		if (stat(buffer, &jeffrey) == 0)
 		{
+			if (access(buffer, X_OK) != 0)
+			{
+				shell.status = EACCES;
+				free(PATH), free(buffer);
+				return (NULL);
+			}
 			free(PATH);
 			return (buffer);
 		}
 	}
-
+	shell.status = ENOENT;
 	free(PATH);
 	free(buffer);
 	return (NULL);
