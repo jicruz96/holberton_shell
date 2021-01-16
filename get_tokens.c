@@ -48,12 +48,13 @@ char **get_tokens(int fd)
  **/
 char *get_heredoc(char **line, int fd)
 {
-	char *token = NULL, *end_tag = parse_line(line), *tmp;
+	char *token = malloc(sizeof(char) * 1), *end_tag = parse_line(line), *tmp;
 	int token_length = 0, searching_for_end_tag = true;
 
 	if (end_tag == NULL)
 		return (NULL);
 
+	*token = '\0';
 	while (searching_for_end_tag)
 	{
 		if (isatty(fd)) /* print PS2 prompt if stdin is terminal */
@@ -63,7 +64,7 @@ char *get_heredoc(char **line, int fd)
 		tmp = _getline(fd);
 
 		/* if next line is end tag, clean up and exit loop */
-		if (_strncmp(tmp, end_tag, _strlen(tmp) - 1) == 0)
+		if (_strncmp(tmp, end_tag, _strlen(end_tag)) == 0 || tmp == NULL)
 		{
 			searching_for_end_tag = false;
 			free(end_tag);
