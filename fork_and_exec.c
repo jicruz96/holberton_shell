@@ -9,26 +9,28 @@ void fork_and_exec(command_t *cmd)
 	pid_t child_pid;
 	int status = 0;
 
-	child_pid = fork();
-	if (child_pid == 0) /* child executes */
+	if (cmd->path || cmd->executor)
 	{
-		if (cmd->executor)
-			shell.status = cmd->executor(cmd->args);
-		else if (cmd->path)
-			shell.status = execve(cmd->path, cmd->args, environ);
+		child_pid = fork();
+		if (child_pid == 0) /* child executes */
+		{
+			if (cmd->executor)
+				shell.status = cmd->executor(cmd->args);
+			else
+				shell.status = execve(cmd->path, cmd->args, environ);
+
+			if (shell.status)
+				exit(handle_error(errno, cmd->command, NULL));
+			exit(shell.status);
+		}
+		/* Parent waits (or detects forking error) */
+		if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
+			shell.status = handle_error(errno, cmd->command, NULL);
 		else
-			errno = ENOENT, shell.status = 1;
-
-		if (shell.status)
-			exit(handle_error(errno, cmd->command, NULL));
-		exit(shell.status);
+			shell.status = WEXITSTATUS(status);
 	}
-
-	/* Parent waits (or detects forking error) */
-	if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
-		shell.status = handle_error(errno, cmd->command, NULL);
 	else
-		shell.status = WEXITSTATUS(status);
+		shell.status = handle_error(shell.status, cmd->command, NULL);
 }
 
 /**
@@ -57,9 +59,11 @@ int get_output_fd(command_t *cmd)
 		fd = open(cmd->output, perms, 0644);
 		if (fd == -1)
 		{
+			shell.status = 2;
 			sprintf(error_msg, str, shell.name, shell.lines, cmd->output);
 			if (errno == ENOENT)
 				_strcat(error_msg, "No such file\n");
+
 			else
 				_strcat(error_msg, "Permission denied\n");
 			write(STDERR_FILENO, error_msg, _strlen(error_msg));
@@ -91,6 +95,7 @@ int get_input_fd(command_t *cmd)
 		fd = open(cmd->input, O_RDONLY);
 		if (fd == -1)
 		{
+			shell.status = 2;
 			sprintf(error_msg, str, shell.name, shell.lines, cmd->input);
 			if (errno == ENOENT)
 				_strcat(error_msg, "No such file\n");
