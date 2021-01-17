@@ -1,7 +1,7 @@
 # -*- MakeFile -*-
 
 CC = gcc
-SRC = command_node_init.c fork_and_exec.c _getenv.c get_executor.c get_history.c _getline.c get_program_path.c get_prompt.c get_tokens.c handle_error.c int_to_str.c execute_line.c _memcpy.c _memset.c prompt_helpers.c _realloc.c save_to_history.c shell.c sigint_handler.c built-ins/alias.c built-ins/cd.c built-ins/env_builtins.c built-ins/exit.c built-ins/history.c strings/_strcat.c strings/_strcmp.c strings/_strcpy.c strings/_strdup.c strings/_strlen.c strings/_puts.c strings/_realloc_string_array.c help.c help_builtins.c
+SRC = 0-main.c 1-get_tokens.c 2-command_config.c 3-get_IO.c 4-execute.c helpers/_getenv.c helpers/_getline.c helpers/handle_error.c helpers/prompt_helpers.c helpers/get_prompt.c helpers/_realloc.c built-ins/alias.c built-ins/cd.c built-ins/env.c built-ins/setenv.c built-ins/unsetenv.c built-ins/exit.c built-ins/history.c built-ins/help.c strings/_strcat.c strings/_strcmp.c strings/_strcpy.c strings/_strdup.c strings/_strlen.c strings/_puts.c strings/_realloc_string_array.c
 OBJ = $(SRC:.c=.o)
 NAME = hsh
 RM = rm -f

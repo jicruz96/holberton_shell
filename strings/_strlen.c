@@ -1,5 +1,3 @@
-#include "my_strings.h"
-
 /**
  * _strlen - custom strlen
  * @str: string

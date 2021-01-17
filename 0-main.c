@@ -1,6 +1,12 @@
 #include "shell.h"
+#include "helpers/_getline.h"
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <sys/errno.h>
+#include <unistd.h>
+#include <stdio.h>
 
-shell_t shell = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+shell_t shell = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /**
  * main - entry point to shell
@@ -10,7 +16,7 @@ shell_t shell = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
  **/
 int main(int argc, char *argv[])
 {
-	int fd = STDIN_FILENO;
+	int i, fd = STDIN_FILENO;
 	char *shellname = argv[0], error_msg[256];
 
 	/* If an argument was passed, get its file descriptor */
@@ -28,7 +34,18 @@ int main(int argc, char *argv[])
 	}
 
 	/* Initialize shell */
-	shell_init(shellname, fd);
+	shell.run = true;
+	shell.name = shellname;
+	shell.lines = 1;
+	shell.interactive = isatty(fd);
+	environ = _realloc_string_array(environ, false);
+	if (shell.interactive) /* get history */
+	{
+		shell.history = malloc(sizeof(char *) * HISTSIZE);
+		for (i = 0; i < HISTSIZE; i++)
+			shell.history[i] = NULL;
+		shell.history_size = get_history(shell.history);
+	}
 
 	/* EXECUTION */
 	execute_hshrc();
@@ -37,33 +54,6 @@ int main(int argc, char *argv[])
 	/* CLEAN UP */
 	shell_cleanup();
 	return (shell.status);
-
-}
-
-/**
- * shell_init - initializes new shell session
- * @shellname: shell name
- * @input: true if shell session is interactive, false if not
- **/
-void shell_init(char *shellname, int input)
-{
-	int i;
-
-	shell.run = true;
-	shell.pid = getpid();
-	shell.name = shellname;
-	shell.lines = 1;
-	shell.status = 0;
-	shell.aliases = NULL;
-	shell.interactive = isatty(input);
-	environ = _realloc_string_array(environ, 0);
-	if (shell.interactive)
-	{
-		shell.history = malloc(sizeof(char *) * HISTSIZE);
-		for (i = 0; i < HISTSIZE; i++)
-			shell.history[i] = NULL;
-		shell.history_size = get_history(shell.history);
-	}
 }
 
 /**
@@ -155,4 +145,16 @@ void execute_hshrc(void)
 	}
 	else
 		execute_file(hshrc_fd);
+}
+
+/**
+ * sigint_handler - handles SIGINT (CTRL-C) signal for shell
+ * @signum: signal number caught by signal, 2 for SIGINT
+ **/
+void sigint_handler(int signum)
+{
+	(void)signum;
+
+	write(STDOUT_FILENO, "\n", 1);
+	write(STDOUT_FILENO, shell.prompt, _strlen(shell.prompt));
 }

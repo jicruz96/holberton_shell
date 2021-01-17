@@ -1,4 +1,6 @@
 #include "../shell.h"
+#include <unistd.h>
+#include <stdio.h>
 
 /**
  * get_alias - returns alias of a token (or token itself if no alias)
@@ -100,4 +102,24 @@ int print_aliases(void)
 		tmp = tmp->next;
 	}
 	return (EXIT_SUCCESS);
+}
+
+/**
+ * help_alias - prints alias help content
+ **/
+void help_alias(void)
+{
+	int i;
+	char *lines[] = {
+		"alias: alias [name[=value] ... ]",
+		"\t`alias' with no arguments prints the list of aliases in the",
+		"\tof aliases in the form alias NAME=VALUE on standard output.",
+		"\tOtherwise, an alias is defined for each NAME whose VALUE is given.",
+		"\tA trailing space in VALUE causes the next word to be checked for",
+		"\talias substitution when the alias is expanded.  Alias returns",
+		"\ttrue unless a NAME is given for which no alias has been defined.",
+		NULL};
+
+	for (i = 0; lines[i]; i++)
+		_puts(lines[i]);
 }

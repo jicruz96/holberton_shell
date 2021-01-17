@@ -1,36 +1,33 @@
 #include "shell.h"
+#include <fcntl.h>
+#include <sys/errno.h>
+#include <unistd.h>
+#include <stdio.h>
 
 /**
- * fork_and_exec - forks and executes
+ * get_IO - formats cmd input and output streams
  * @cmd: command node
- **/
-void fork_and_exec(command_t *cmd)
+ * @prev_logic: previous command's logic
+ * Return: 1 on success -1 on failure
+ */
+int get_IO(command_t *cmd, int prev_logic)
 {
-	pid_t child_pid;
-	int status = 0;
+	static int pipefds[2];
 
-	if (cmd->path || cmd->executor)
-	{
-		child_pid = fork();
-		if (child_pid == 0) /* child executes */
-		{
-			if (cmd->executor)
-				shell.status = cmd->executor(cmd->args);
-			else
-				shell.status = execve(cmd->path, cmd->args, environ);
-
-			if (shell.status)
-				exit(handle_error(errno, cmd->command, NULL));
-			exit(shell.status);
-		}
-		/* Parent waits (or detects forking error) */
-		if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
-			shell.status = handle_error(errno, cmd->command, NULL);
-		else
-			shell.status = WEXITSTATUS(status);
-	}
+	if (prev_logic & IS_PIPE) /* get input_fd */
+		cmd->input_fd = pipefds[0];
 	else
-		shell.status = handle_error(shell.status, cmd->command, NULL);
+		cmd->input_fd = get_input_fd(cmd);
+	if (cmd->input_fd == -1)
+		return (-1);
+
+	cmd->output_fd = get_output_fd(cmd); /* get output fd */
+
+	if (cmd->logic & IS_PIPE && !(cmd->logic & (IS_REDIR_OUT | IS_APPEND)))
+		pipe(pipefds), cmd->output_fd = pipefds[1];
+	if (cmd->output_fd == -1)
+		return (-1);
+	return (1);
 }
 
 /**

@@ -1,4 +1,6 @@
-#include "shell.h"
+#include "../shell.h"
+#include <time.h>
+#include <unistd.h>
 
 /**
  * get_cwd_prompt - gets current working directory for prompt formatting

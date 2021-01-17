@@ -1,4 +1,5 @@
-#include "../shell.h"
+#include "my_strings.h"
+#include <stdlib.h>
 
 /**
  * _realloc_string_array - does what it sounds like

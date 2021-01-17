@@ -1,5 +1,3 @@
-#include "my_strings.h"
-
 /**
  * _strcpy - custom strcpy
  * @dest: where string will be copied

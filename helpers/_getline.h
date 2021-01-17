@@ -1,13 +1,6 @@
 #ifndef GETLINE_H
 #define GETLINE_H
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-
-#define READ_SIZE 1024
-
 /**
  * struct reader_s -    associates a file descriptor to its file's contents.
  *                      The i allows the struct to track what's been read.
@@ -25,6 +18,7 @@ typedef struct reader_s
 	struct reader_s *next;
 } reader_t;
 
+/* _getline.c declarations */
 char *_getline(const int fd);
 char *find_line(reader_t *rd);
 void _memset(char *s, int c, int n);

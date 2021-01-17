@@ -1,4 +1,6 @@
-#include "shell.h"
+#include "../shell.h"
+#include <unistd.h>
+#include <stdio.h>
 
 /**
  * get_prompt - returns the prompt, a formatted string
@@ -7,14 +9,12 @@
  */
 char *get_prompt(int fd)
 {
+	char *(*formatters[])(void) = {&get_date_prompt, &get_hostname_prompt,
+								   &get_shellname_prompt, &get_username_prompt,
+								   &get_cwd_prompt, NULL};
 	int i, j;
 	char *prompt, *str = NULL, *tmp = NULL;
-	format_match_t matchers[] = {{'d', &get_date_prompt},
-								 {'H', &get_hostname_prompt},
-								 {'s', &get_shellname_prompt},
-								 {'u', &get_username_prompt},
-								 {'w', &get_cwd_prompt},
-								 {'\0', NULL}};
+	char specifiers[] = {'d', 'H', 's', 'u', 'w', '\0'};
 
 	if (!isatty(fd))
 		return (_strdup(""));
@@ -28,10 +28,10 @@ char *get_prompt(int fd)
 
 	for (i = 0; prompt[i]; i++)
 		if (prompt[i] == '\\')
-			for (j = 0; matchers[j].formatter; j++)
-				if (matchers[j].specifier == prompt[i + 1])
+			for (j = 0; specifiers[j]; j++)
+				if (specifiers[j] == prompt[i + 1])
 				{
-					str = matchers[j].formatter();
+					str = formatters[j]();
 					tmp = _realloc(tmp, _strlen(str) + _strlen(prompt) - 1);
 					sprintf(tmp, "%.*s%s%s", i, prompt, str, prompt + i + 2);
 					free(prompt);

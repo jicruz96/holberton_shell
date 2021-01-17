@@ -1,20 +1,11 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-#include <time.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/errno.h>
-#include <sys/types.h>
 #include "strings/my_strings.h"
 
 #define HISTSIZE 4096
+#define READ_SIZE 1
 
 #define DEFAULT_LOGIC 0000
 #define IS_REDIR_OUT 0001
@@ -26,13 +17,7 @@
 #define IS_PIPE 0100
 #define HAS_EXTRA 0200
 
-#define CD_FAIL 100
-#define UNSETENV_FAIL 101
-#define SETENV_FAIL 102
-#define SETENV2 103
-#define EXIT_ERROR 104
 #define SYNTAX_ERROR 105
-#define INPUT_FAIL 106
 #define CANT_OPEN 127
 
 #define IS_NUMERIC(x) ((x) >= '0' && (x) <= '9')
@@ -45,17 +30,6 @@
 #define PS2 "> "
 
 typedef int (*exec_f)(char **);
-
-/**
- * struct format_match_s - matches a function to a format specifier
- * @specifier: format specifier associated with formatter
- * @formatter: function that returns a formatted string
- **/
-typedef struct format_match_s
-{
-	char specifier;
-	char *(*formatter)(void);
-} format_match_t;
 
 /**
  * struct command_s - command struct
@@ -106,7 +80,6 @@ typedef struct alias_s
  * @history_fd: history file descriptor
  * @interactive: if shell is in interactive mode
  * @history_size: size of history
- * @pid: shell process id
  * @aliases: alias list
  **/
 typedef struct shell_s
@@ -120,39 +93,34 @@ typedef struct shell_s
 	int history_fd;
 	int interactive;
 	int history_size;
-	pid_t pid;
 	alias_t *aliases;
 } shell_t;
 
-/**
- * struct codes_s - associates an error code with an error message
- * @code: error code
- * @shell_code: error code to display in shell
- * @msg: message
- **/
-typedef struct codes_s
-{
-	int code;
-	int shell_code;
-	char *msg;
-} code_t;
-
+/* global variable declarations */
 extern char **environ;
 extern shell_t shell;
 
+/* main shell function declarations */
+void shell_init(char *shellname, int input);
 void execute_hshrc(void);
-char *_getenv(char *key);
-char *get_prompt(int fd);
-int get_history(char *history[]);
 void execute_file(int fd);
+void shell_cleanup(void);
+void sigint_handler(int signum);
 
-command_t *command_node_init(char *path);
+void execute_line(char **tokens);
+int fork_and_exec(command_t *cmd);
+int get_IO(command_t *cmd, int prev_logic);
+int get_input_fd(command_t *cmd);
+int get_output_fd(command_t *cmd);
+int clean_pipes(command_t *cmd);
+
+/* Command configuration function declarations */
 command_t *make_command(char **tokens, int *i);
+command_t *command_config(char *path);
+exec_f get_executor(char *command);
+char *get_program_path(char *program);
 
-char *get_alias(char *alias);
-void fork_and_exec(command_t *cmd);
-int execute_commands(command_t *command);
-char **_realloc_string_array(char **array, int is_malloced);
+/* built-in function declarations */
 int builtin_cd(char **args);
 int builtin_setenv(char **args);
 int builtin_alias(char **args);
@@ -162,44 +130,30 @@ int builtin_setenv(char **args);
 int builtin_unsetenv(char **args);
 int builtin_history(char **args);
 int builtin_exit(char **args);
-int execute_command(char **args);
 
-exec_f get_executor(char *command);
-
-int get_input_fd(command_t *cmd);
-int get_output_fd(command_t *cmd);
+/* history helper function declarations */
+int get_history(char *history[]);
 void save_line_to_history(char *line);
 void save_history_to_file(void);
-void sigint_handler(int signum);
-void handle_redir(command_t *, char **, int *);
-void handle_and(command_t *, char **, int *);
-void handle_pipe(command_t *, char **, int *);
-void shell_init(char *shellname, int input);
-void print_stupid(char *str, int fd);
 
-int print_aliases(void);
+/* alias helper function declarations */
+char *get_alias(char *alias);
 int print_alias(char *alias);
+int print_aliases(void);
 
-char *get_program_path(char *program);
-char *_getline(const int fd);
-char *parse_line(char **string);
+/* tokenization and expansion function declarations */
 char **get_tokens(int fd);
-void execute_line(char **tokens);
-
-void shell_cleanup(void);
-int get_IO(command_t *cmd, int prev_logic);
-bool clean_pipes(command_t *cmd);
-
+char *parse_line(char **string);
 char *fix_dquote(char **line, char *token, int fd);
 char *get_heredoc(char **line, int fd);
-char *_realloc(char *p, int size);
-
-int handle_syntax_error(char *token);
-int handle_error(int code, char *program, char *supplement);
-int _strlen(char *str);
 char *replace_vars(char *token);
-char *int_to_str(int n);
 
+/* error handler function declarations */
+int handle_error(int code, char *program);
+int handle_syntax_error(char *token);
+
+/* prompt handling function declarations */
+char *get_prompt(int fd);
 char *get_date_prompt(void);
 char *get_hostname_prompt(void);
 char *get_username_prompt(void);
@@ -213,5 +167,12 @@ void help_alias(void);
 void help_exit(void);
 void help_cd(void);
 void help_history(void);
-int help_environment(char *);
+void help_env(void);
+void help_setenv(void);
+void help_unsetenv(void);
+
+/* other helpers function declarations */
+char *_getenv(char *key);
+char *_realloc(char *p, int size);
+
 #endif /* SHELL_H */

@@ -1,7 +1,9 @@
 #include "shell.h"
+#include "helpers/_getline.h"
+#include <unistd.h>
 
 /**
- * get_tokens - parses file and returns token array, split by spaces
+ * get_tokens - reads file and returns token array, split by spaces
  *
  * @fd: file descriptor of file to parse
  * Return: array of tokens
@@ -38,7 +40,6 @@ char **get_tokens(int fd)
 		free(buf);
 	return (tokens);
 }
-
 
 /**
  * get_heredoc - gets heredoc
@@ -123,7 +124,7 @@ char *fix_dquote(char **line, char *token, int fd)
 }
 
 /**
- * parse_line - parses a line and returns the next token found
+ * parse_line - scans a line and returns the next token found
  * @line: pointer to line pointer
  * Return: next token parsed
  **/

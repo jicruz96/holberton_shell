@@ -1,4 +1,8 @@
 #include "shell.h"
+#include <sys/wait.h>
+#include <sys/errno.h>
+#include <unistd.h>
+#include <stdio.h>
 
 /**
  * execute_line - makes linked list of commands from tokens
@@ -23,13 +27,21 @@ void execute_line(char **tokens)
 		cmd = make_command(tokens, &i);
 		if (get_IO(cmd, prev_logic) == 1)
 		{
+			/* Set input and output */
 			dup2(cmd->input_fd, STDIN_FILENO);
 			dup2(cmd->output_fd, STDOUT_FILENO);
-			if (cmd->executor) /* execute command */
+
+			/* Execute command (or handle error) */
+			if (cmd->executor)
 				shell.status = cmd->executor(cmd->args);
-			else
+			else if (cmd->path)
 				fork_and_exec(cmd);
-			dup2(stdin_cpy, STDIN_FILENO), dup2(stdout_cpy, STDOUT_FILENO);
+			else
+				shell.status = handle_error(shell.status, cmd->command);
+
+			/* Reset input and output */
+			dup2(stdin_cpy, STDIN_FILENO);
+			dup2(stdout_cpy, STDOUT_FILENO);
 		}
 		prev_logic = cmd->logic;
 		if (clean_pipes(cmd) == 0)
@@ -48,7 +60,7 @@ void execute_line(char **tokens)
 command_t *make_command(char **tokens, int *i)
 {
 	int j;
-	command_t *cmd = command_node_init(replace_vars(tokens[(*i)++]));
+	command_t *cmd = command_config(replace_vars(tokens[(*i)++]));
 
 	/* COMMAND READING LOOP (ENDS WHEN THE COMMANDS ENDS*/
 	for (j = 1; !IS_SEPARATOR(tokens[*i]); (*i)++)
@@ -95,7 +107,7 @@ command_t *make_command(char **tokens, int *i)
  **/
 char *replace_vars(char *token)
 {
-	char *new_token, *value;
+	char *new_token, *value = _realloc(NULL, sizeof(char) * 12);
 	int i;
 
 	/* check for a '$' . If no dollar signs, return token */
@@ -106,47 +118,21 @@ char *replace_vars(char *token)
 	if (!token[i + 1] || token[i + 1] == ' ')
 		return (token);
 
-	if (_strcmp(token + i, "$$") == 0) /* If '$$' get pid */
-		value = int_to_str(shell.pid);
-	else if (_strcmp(token + i, "$?") == 0) /* If 'S?' get prev exit status */
-		value = int_to_str(shell.status);
-	else /* else, get variable value from environment */
-		value = _getenv(token + i + 1);
-	/* Create token */
-	if (value == NULL)
-		value = "";
-	new_token = _realloc(NULL, i + _strlen(value) + 1);
-	sprintf(new_token, "%.*s%s", i, token, value); /* dope-ass printf logic */
-	free(token);								   /* free old token */
-	if (*value)
-		free(value);				  /* free value buffer */
-	return (replace_vars(new_token)); /* check for more variables */
-}
-
-/**
- * get_IO - formats cmd input and output streams
- * @cmd: command node
- * @prev_logic: previous command's logic
- * Return: 1 on success -1 on failure
- */
-int get_IO(command_t *cmd, int prev_logic)
-{
-	static int pipefds[2];
-
-	if (prev_logic & IS_PIPE) /* get input_fd */
-		cmd->input_fd = pipefds[0];
+	if (_strcmp(token + i, "$$") == 0)
+		sprintf(value, "%d", getpid());
+	else if (_strcmp(token + i, "$?") == 0)
+		sprintf(value, "%d", shell.status);
 	else
-		cmd->input_fd = get_input_fd(cmd);
-	if (cmd->input_fd == -1)
-		return (-1);
+		free(value), value = _getenv(token + i + 1);
 
-	cmd->output_fd = get_output_fd(cmd); /* get output fd */
+	/* Create token */
+	new_token = _realloc(NULL, i + _strlen(value) + 1);
+	_strncpy(new_token, token, i);
+	_strcat(new_token, value);
+	free(token);
+	free(value);
 
-	if (cmd->logic & IS_PIPE && !(cmd->logic & (IS_REDIR_OUT | IS_APPEND)))
-		pipe(pipefds), cmd->output_fd = pipefds[1];
-	if (cmd->output_fd == -1)
-		return (-1);
-	return (1);
+	return (replace_vars(new_token)); /* check for more variables */
 }
 
 /**
@@ -154,7 +140,7 @@ int get_IO(command_t *cmd, int prev_logic)
  * @cmd: cmd
  * Return: to keep running shell or not
  **/
-bool clean_pipes(command_t *cmd)
+int clean_pipes(command_t *cmd)
 {
 	int logic = cmd->logic, i;
 
@@ -178,4 +164,30 @@ bool clean_pipes(command_t *cmd)
 		return (false);
 
 	return (true);
+}
+
+/**
+ * fork_and_exec - forks and executes
+ * @cmd: command node
+ * Return: exit status of execution
+ **/
+int fork_and_exec(command_t *cmd)
+{
+	pid_t child_pid;
+	int status = 0;
+
+	child_pid = fork();
+
+	/* child executes */
+	if (child_pid == 0)
+	{
+		shell.status = execve(cmd->path, cmd->args, environ);
+		exit(handle_error(errno, cmd->command));
+	}
+
+	/* Parent waits and returns status */
+	if (child_pid == -1 || waitpid(child_pid, &status, 0) == -1)
+		return (handle_error(errno, cmd->command));
+	else
+		return (WEXITSTATUS(status));
 }

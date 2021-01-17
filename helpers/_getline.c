@@ -1,6 +1,13 @@
-
-#include "shell.h"
 #include "_getline.h"
+#include <stdlib.h>
+#include <unistd.h>
+
+#define READ_SIZE 4096
+
+#ifndef NULL
+#define NULL ((char *)0)
+#endif
+
 /**
  * _getline -   returns string leading up to newline in a file. subsequent
  *              calls return the following line, and so on.
@@ -94,4 +101,35 @@ char *find_line(reader_t *rd)
 	}
 
 	return (line);
+}
+
+/**
+ * _memcpy - custom memcpy
+ * @dest: memory area to copy to
+ * @src: memory area to copy from
+ * @n: number of bytes to set
+ * Return: pointer to dest
+ **/
+char *_memcpy(char *dest, char *src, int n)
+{
+	int i;
+
+	for (i = 0; i < n; i++)
+		dest[i] = src[i];
+
+	return (dest);
+}
+
+/**
+ * _memset - custom memset
+ * @s: pointer to area to set
+ * @c: character to set memory with
+ * @n: number of bytes to set
+ **/
+void _memset(char *s, int c, int n)
+{
+	int i;
+
+	for (i = 0; i < n; i++)
+		s[i] = c;
 }

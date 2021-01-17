@@ -1,7 +1,6 @@
 #ifndef MY_STRINGS_H
 #define MY_STRINGS_H
 
-
 #ifndef NULL
 #define NULL ((void *)0)
 #endif /* NULL */
@@ -16,5 +15,6 @@ char *_strcpy(char *dest, char *src);
 char *_strncpy(char *dest, char *src, int n);
 char *_strdup(char *str);
 char *_strndup(char *str, int n);
+char **_realloc_string_array(char **array, int is_malloced);
 
 #endif /* MY_STRINGS_H */

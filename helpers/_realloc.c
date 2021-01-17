@@ -1,4 +1,4 @@
-#include "shell.h"
+#include <stdlib.h>
 
 /**
  * _realloc - custom realloc
