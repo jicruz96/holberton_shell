@@ -107,13 +107,15 @@ command_t *make_command(char **tokens, int *i)
  **/
 char *replace_vars(char *token)
 {
-	char *new_token, *value = _realloc(NULL, sizeof(char) * 12);
+	char *new_token, *value;
 	int i;
 
 	/* check for a '$' . If no dollar signs, return token */
 	for (i = 0; token[i] != '$'; i++)
 		if (token[i] == '\0')
 			return (token);
+
+	value = _realloc(NULL, sizeof(char) * 12);
 
 	if (!token[i + 1] || token[i + 1] == ' ')
 		return (token);
