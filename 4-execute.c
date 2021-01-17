@@ -35,7 +35,7 @@ void execute_line(char **tokens)
 			if (cmd->executor)
 				shell.status = cmd->executor(cmd->args);
 			else if (cmd->path)
-				fork_and_exec(cmd);
+				shell.status = fork_and_exec(cmd);
 			else
 				shell.status = handle_error(shell.status, cmd->command);
 
@@ -115,10 +115,10 @@ char *replace_vars(char *token)
 		if (token[i] == '\0')
 			return (token);
 
-	value = _realloc(NULL, sizeof(char) * 12);
-
 	if (!token[i + 1] || token[i + 1] == ' ')
 		return (token);
+
+	value = _realloc(NULL, sizeof(char) * 12);
 
 	if (_strcmp(token + i, "$$") == 0)
 		sprintf(value, "%d", getpid());
